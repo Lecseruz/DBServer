@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-MAINTAINER Magomed
+MAINTAINER Magomed Gadjiev
 
 # Обвновление списка пакетов
 RUN apt-get -y update
