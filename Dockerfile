@@ -48,10 +48,10 @@ USER root
 
 RUN apt-get install -y openjdk-8-jdk-headless maven
 
-ENV WORK /opt/dbApi
-ADD ./ $WORK/DBServer
+ENV WORK /opt/DBServer
+ADD /java $WORK
 
-WORKDIR $WORK/DBServer
+WORKDIR $WORK
 
 RUN mvn package
 
