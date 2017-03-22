@@ -42,14 +42,11 @@ USER root
  #
 
  # Установка JDK
- RUN apt-get install -y openjdk-8-jdk-headless
- RUN apt-get install -y maven
-
 
 RUN apt-get install -y openjdk-8-jdk-headless maven
 
 ENV WORK /opt/DBServer
-ADD /java $WORK
+ADD /java $WORK/
 
 WORKDIR $WORK
 
