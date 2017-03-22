@@ -7,8 +7,11 @@ public interface ForumDAO {
      * This is the method to be used to create
      * a record in the Student table.
      */
+    public void createTable();
+
     public void create(String title, String name, String slug, int posts, int threads);
 
+    public void  dropTable();
     /**
      * This is the method to be used to list down
      * a record from the Student table corresponding

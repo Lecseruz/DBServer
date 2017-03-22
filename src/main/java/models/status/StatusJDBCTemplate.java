@@ -1,12 +1,13 @@
 package models.status;
 
+import models.forum.ForumJDBCTemplate;
+import models.post.PostJDBCTemplate;
+import models.thread.ThreadJDBCTemplate;
+import models.user.UserJDBCTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.sql.DataSource;
-import java.util.List;
 
 /**
  * Created by magomed on 20.03.17.
@@ -16,72 +17,40 @@ import java.util.List;
 @Transactional
 public class StatusJDBCTemplate implements StatusDAO {
     private final JdbcTemplate jdbcTemplate;
+    private final UserJDBCTemplate userJDBCTemplate;
+    private final ForumJDBCTemplate forumJDBCTemplate;
+    private final PostJDBCTemplate postJDBCTemplate;
+    private final ThreadJDBCTemplate threadJDBCTemplate;
 
     @Autowired
-    public StatusJDBCTemplate(JdbcTemplate jdbcTemplate) {
+    public StatusJDBCTemplate(JdbcTemplate jdbcTemplate, UserJDBCTemplate userJDBCTemplate, ForumJDBCTemplate forumJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userJDBCTemplate = userJDBCTemplate;
+        this.forumJDBCTemplate = forumJDBCTemplate;
+        this.threadJDBCTemplate = threadJDBCTemplate;
+        this.postJDBCTemplate = postJDBCTemplate;
+        dropTable();
+        createTable();
     }
 
     @Override
-    public void updateCountForum(Integer integer) {
-        String SQL = "update status set count_forum = ?";
-        jdbcTemplate.update(SQL, integer);
-        System.out.println("Updated Record with ID = " + integer );
+    public Status getStatus() {
+        return new Status(userJDBCTemplate.getCount(), forumJDBCTemplate.getCount(),  threadJDBCTemplate.getCount(), postJDBCTemplate.getCount());
     }
 
     @Override
-    public void updateCountUser(Integer integer) {
-        String SQL = "update status set count_user = ?";
-        jdbcTemplate.update(SQL, integer);
-        System.out.println("Updated Record with ID = " + integer );
+    public void createTable() {
+        userJDBCTemplate.createTable();
+        forumJDBCTemplate.createTable();
+        postJDBCTemplate.createTable();
+        threadJDBCTemplate.createTable();
     }
 
     @Override
-    public void updateCountThread(Integer integer) {
-        String SQL = "update status set count_thread = ?";
-        jdbcTemplate.update(SQL, integer);
-        System.out.println("Updated Record with ID = " + integer );
-    }
-
-    @Override
-    public void updateCountPosts(Integer integer) {
-        String SQL = "update status set count_posts = ?";
-        jdbcTemplate.update(SQL, integer);
-        System.out.println("Updated Record with ID = " + integer );
-    }
-
-    @Override
-    public int getCountForum() {
-        String SQL = "select count_forum from status";
-        Integer count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        return count;
-    }
-
-    @Override
-    public int getCountPost() {
-        String SQL = "select count_post from status";
-        Integer count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        return count;
-    }
-
-    @Override
-    public int getCountUser() {
-        String SQL = "select count_user from status";
-        Integer count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        return count;
-    }
-
-    @Override
-    public int getCountThread() {
-        String SQL = "select count_thread from status";
-        Integer count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        return count;
-    }
-
-    @Override
-    public void delete() {
-        String SQL = "delete from Status";
-        jdbcTemplate.update(SQL);
-        System.out.println("Deleted Record" );
+    public void dropTable() {
+        postJDBCTemplate.dropTable();
+        forumJDBCTemplate.dropTable();
+        threadJDBCTemplate.dropTable();
+        userJDBCTemplate.dropTable();
     }
 }

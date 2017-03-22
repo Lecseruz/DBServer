@@ -9,10 +9,9 @@ import java.util.TimeZone;
 import javax.sql.DataSource;
 
 interface ThreadDAO {
-    /**
-     * This is the method to be used to create
-     * a record in the Student table.
-     */
+    public void createTable();
+
+    public void  dropTable();
     public void create(Integer id, String title, String author, String forum, String message, Integer votes, String slug, Timestamp created);
 
     /**
@@ -24,8 +23,6 @@ interface ThreadDAO {
      * This is the method to be used to list down
      * all the records from the Student table.
      */
-    public List<Thread> listThread();
-
     public Thread getThread(Integer id);
     /**
      * This is the method to be used to delete
@@ -40,5 +37,4 @@ interface ThreadDAO {
      * This is the method to be used to update
      * a record into the Student table.
      */
-    public void update(Integer id, Integer age);
 }

@@ -21,6 +21,25 @@ public class ForumJDBCTemplate implements ForumDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+
+    @Override
+    public void createTable() {
+        String sql = new StringBuilder()
+                .append("CREATE EXTENSION IF NOT EXISTS citext; ")
+                .append("CREATE TABLE IF NOT EXISTS forum ( ")
+                .append("title VARCHAR(128) NOT NULL, ")
+                .append("admin CITEXT NOT NULL, ")
+                .append("slug CITEXT UNIQUE NOT NULL PRIMARY KEY, ")
+                .append("posts BIGINT NOT NULL DEFAULT 0, ")
+                .append("threads BIGINT NOT NULL DEFAULT 0, ")
+                .append("FOREIGN KEY (admin) REFERENCES m_user(nickname)); ")
+                .toString();
+        LOGGER.debug(sql + "create table success");
+
+        jdbcTemplate.execute(sql);
+    }
+
+
     @Override
     public void create(String title, String f_user, String slug, int posts, int thread) {
         String SQL = "insert into Forum (title, nickname, slug, posts, threads) values (?, ?, ?, ?, ?)";
@@ -29,9 +48,19 @@ public class ForumJDBCTemplate implements ForumDAO {
     }
 
     @Override
+    public void dropTable() {
+        String query = "DROP TABLE IF EXISTS forum";
+
+        jdbcTemplate.execute(query);
+        LOGGER.debug("drop table success");
+
+    }
+
+    @Override
     public List<Forum> listForum() {
         String SQL = "select * from Forum";
         List <Forum> forums = jdbcTemplate.query(SQL, new ForumMapper());
+        LOGGER.debug("get list forum success");
         return forums;
     }
 
@@ -39,6 +68,8 @@ public class ForumJDBCTemplate implements ForumDAO {
     public Forum getForumBySlug(String slug) {
         String SQL = "select * from Forum where slug = ?";
         Forum forum = jdbcTemplate.queryForObject(SQL, new Object[] { slug }, new ForumMapper());
+        LOGGER.debug("get froum by slug success");
+
         return forum;
     }
 
@@ -46,6 +77,7 @@ public class ForumJDBCTemplate implements ForumDAO {
     public Forum getForum(String nickname, String title ) {
         String SQL = "select * from Forum where nickname = ? and title = ?";
         Forum forum = jdbcTemplate.queryForObject(SQL, new Object[] { nickname, title }, new ForumMapper());
+        LOGGER.debug("get forum success");
         return forum;
     }
 
@@ -53,6 +85,7 @@ public class ForumJDBCTemplate implements ForumDAO {
     public int getCount() {
         String SQL = "select COUNT(*) from forum";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
+        LOGGER.debug("get count success");
         return count;
     }
 

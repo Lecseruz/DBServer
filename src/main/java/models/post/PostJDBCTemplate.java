@@ -24,6 +24,34 @@ public class PostJDBCTemplate implements PostDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Override
+    public void createTable(){
+        String sql = new StringBuilder()
+                .append("CREATE EXTENSION IF NOT EXISTS citext; ")
+                .append("CREATE TABLE IF NOT EXISTS post ( ")
+                .append("id SERIAL PRIMARY KEY, ")
+                .append("parent_id BIGINT NOT NULL DEFAULT 0, ")
+                .append("author CITEXT NOT NULL, ")
+                .append("message TEXT NOT NULL, ")
+                .append("isEdited BOOLEAN NOT NULL DEFAULT false, ")
+                .append("forum CITEXT NOT NULL, ")
+                .append("thread BIGINT NOT NULL, ")
+                .append("created TIMESTAMP NOT NULL DEFAULT current_timestamp);")
+                .toString();
+        LOGGER.debug(sql +
+                "create table success");
+
+        jdbcTemplate.execute(sql);
+    }
+
+    @Override
+    public void dropTable(){
+        String query = "DROP TABLE IF EXISTS post";
+
+        jdbcTemplate.execute(query);
+        LOGGER.debug("drop table success");
+
+    }
 
     @Override
     public void create(Integer id, int parent, String author, String message, boolean isEdited, String forum, int thread, Timestamp created) {
@@ -32,9 +60,11 @@ public class PostJDBCTemplate implements PostDAO {
         LOGGER.debug("created" + id + " with user ");
     }
 
-    @Override
-    public List<Post> listThread() {
-        return null;
+    public int getCount(){
+        String SQL = "select COUNT(*) from post";
+        int count = jdbcTemplate.queryForObject(SQL, Integer.class);
+        LOGGER.debug("getCount success");
+        return count;
     }
 
     @Override
@@ -43,10 +73,4 @@ public class PostJDBCTemplate implements PostDAO {
         jdbcTemplate.update(SQL);
         System.out.println("Deleted Record" );
     }
-
-    @Override
-    public void update(Integer id) {
-
-    }
-
 }

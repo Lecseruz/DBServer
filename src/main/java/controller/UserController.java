@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/user/{nickname}")
 public class UserController {
-    private int countUser = 0;
     final UserJDBCTemplate userJDBCTemplate;
     final StatusJDBCTemplate statusJDBCTemplate;
 
@@ -25,8 +24,6 @@ public class UserController {
     public UserController(UserJDBCTemplate userJDBCTemplate, StatusJDBCTemplate statusJDBCTemplate) {
         this.userJDBCTemplate = userJDBCTemplate;
         this.statusJDBCTemplate = statusJDBCTemplate;
-        countUser = userJDBCTemplate.getCount();
-
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -39,9 +36,7 @@ public class UserController {
             User user1 = userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail());
             return new ResponseEntity<User>(user1, HttpStatus.CONFLICT);
         } catch (EmptyResultDataAccessException e) {
-            ++countUser;
             userJDBCTemplate.create(nickname, user.getFullname(), user.getAbout(), user.getEmail());
-            statusJDBCTemplate.updateCountUser(countUser);
             return new ResponseEntity<Object>(user, HttpStatus.OK);
         }
     }

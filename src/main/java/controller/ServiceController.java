@@ -38,11 +38,7 @@ public class ServiceController {
 
     @RequestMapping(value = "/service/clear", method = RequestMethod.GET)
     public ResponseEntity<?> clear() throws IOException {
-        forumJDBCTemplate.delete();
-        userJDBCTemplate.delete();
-        statusJDBCTemplate.delete();
-        threadJDBCTemplate.delete();
-        postJDBCTemplate.delete();
+        statusJDBCTemplate.dropTable();
         return new ResponseEntity<Object>(null, HttpStatus.OK);
     }
 }

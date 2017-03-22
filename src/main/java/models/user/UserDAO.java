@@ -9,6 +9,9 @@ interface UserDAO {
      * database resources ie. connection.
      */
 
+    public void createTable();
+
+    public void  dropTable();
     /**
      * This is the method to be used to create
      * a record in the Student table.
