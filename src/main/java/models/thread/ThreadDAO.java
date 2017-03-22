@@ -34,6 +34,8 @@ interface ThreadDAO {
      */
     public void delete();
 
+    public int getCount();
+
     /**
      * This is the method to be used to update
      * a record into the Student table.

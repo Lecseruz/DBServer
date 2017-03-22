@@ -5,7 +5,11 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
+@Transactional
 public class StudentJDBCTemplate implements StudentDAO {
     private DataSource dataSource;
     private JdbcTemplate jdbcTemplateObject;

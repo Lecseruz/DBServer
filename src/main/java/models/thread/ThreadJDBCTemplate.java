@@ -1,5 +1,6 @@
 package models.thread;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.management.timer.TimerMBean;
@@ -9,18 +10,21 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Created by magomed on 19.03.17.
- */
+
+@Service
+@Transactional
 public class ThreadJDBCTemplate implements ThreadDAO {
 
     private JdbcTemplate jdbcTemplate;
 
     private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
 
-    public ThreadJDBCTemplate(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    @Autowired
+    public ThreadJDBCTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -51,6 +55,13 @@ public class ThreadJDBCTemplate implements ThreadDAO {
         String SQL = "delete from thread";
         jdbcTemplate.update(SQL);
         System.out.println("Deleted Record" );
+    }
+
+    @Override
+    public int getCount() {
+        String SQL = "select COUNT(*) from thread";
+        int count = jdbcTemplate.queryForObject(SQL, Integer.class);
+        return count;
     }
 
     @Override

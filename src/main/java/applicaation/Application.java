@@ -1,8 +1,8 @@
-package application;
+package applicaation;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 
 
@@ -28,8 +28,8 @@ import org.springframework.context.annotation.ComponentScan;
  *  6. В @RestController'е Spring находит методы помеченные @RequestMapping, запоминает их, чтобы DispatcherServlet, потом, смог произвести вызов
  *  на соответствующий http-запрос.
  */
-@EnableAutoConfiguration
-@ComponentScan(basePackages = "controller, com.zetcode")
+@ComponentScan(basePackages = "controller, com.zetcode, models")
+@ConfigurationProperties("spring.datasource")
 @SpringBootApplication
 public class Application {
 

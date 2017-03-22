@@ -27,9 +27,11 @@ interface UserDAO {
     public List<User> listUsers();
 
 
-    public User getUser(String nickname);
+    public User getUserByNickname(String nickname);
 
-    public User getUserWithEmail(String nickname, String Email);
+    public User getUserByNicknameAndEmail(String nickname, String Email);
+
+    public User getUserByEmail(String email);
 
     /**
      * This is the method to be used to delete
@@ -38,9 +40,11 @@ interface UserDAO {
      */
     public void delete();
 
+    public int getCount();
+
     /**
      * This is the method to be used to update
      * a record into the Student table.
      */
-    public void update(Integer id, Integer age);
+    public void update(String nickname, String about, String fullname, String email);
 }

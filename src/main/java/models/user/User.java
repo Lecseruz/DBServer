@@ -13,6 +13,15 @@ public class User {
         this.email = email;
     }
 
+    public boolean isEmpty(){
+        if (nickname == null || fullname == null || about == null ||
+                email == null){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public User(){
         ;
     }

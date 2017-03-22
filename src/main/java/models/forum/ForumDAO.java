@@ -20,9 +20,11 @@ public interface ForumDAO {
      */
     public List<Forum> listForum();
 
-    public Forum getForumWithSlug(String slug);
+    public Forum getForumBySlug(String slug);
 
     public Forum getForum(String nickname, String title);
+
+    public int getCount();
 
     /**
      * This is the method to be used to delete

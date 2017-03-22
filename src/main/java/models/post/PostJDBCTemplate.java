@@ -4,11 +4,15 @@ import models.thread.ThreadJDBCTemplate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.List;
 
+@Service
+@Transactional
 public class PostJDBCTemplate implements PostDAO {
 
     private final JdbcTemplate jdbcTemplate;
@@ -16,8 +20,8 @@ public class PostJDBCTemplate implements PostDAO {
     private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
 
     @Autowired
-    public PostJDBCTemplate(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public PostJDBCTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
 
