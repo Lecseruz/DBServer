@@ -45,19 +45,16 @@ USER root
  RUN apt-get install -y openjdk-8-jdk-headless
  RUN apt-get install -y maven
 
- # Копируем исходный код в Docker-контейнер
- ENV WORK /opt/dbApi
- ADD ./ $WORK/tpdbforumapi/
- # ADD common/ $WORK/common/
 
- # Собираем и устанавливаем пакет
- WORKDIR $WORK/tpdbforumapi
- RUN mvn package
+RUN apt-get install -y openjdk-8-jdk-headless maven
 
- # Объявлем порт сервера
- EXPOSE 5000
+ENV WORK /opt/dbApi
+ADD ./ $WORK/DBServer
 
- #
- # Запускаем PostgreSQL и сервер
- #
- CMD service postgresql start && java -Xmx300M -Xmx300M -jar $WORK/tpdbforumapi/target/tp-db-forum-api-1.0-SNAPSHOT.jar
+WORKDIR $WORK/DBServer
+
+RUN mvn package
+
+EXPOSE 5000
+
+CMD service postgresql start && java -jar target/BDServer-1.0-SNAPSHOT.jar

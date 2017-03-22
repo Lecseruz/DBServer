@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping(value = "/forum")
+@RequestMapping(value = "/apiforum")
 public class ForumController {
     final private ForumJDBCTemplate forumJDBCTemplate;
     final private StatusJDBCTemplate statusJDBCTemplate;

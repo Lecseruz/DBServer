@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 
 @RestController
-@RequestMapping(value = "/service")
+@RequestMapping(value = "/api/service")
 public class ServiceController {
     private final StatusJDBCTemplate statusJDBCTemplate;
     private final ThreadJDBCTemplate threadJDBCTemplate;

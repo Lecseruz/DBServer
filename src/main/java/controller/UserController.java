@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping(value = "/user/{nickname}")
+@RequestMapping(value = "/api/user/{nickname}")
 public class UserController {
     final UserJDBCTemplate userJDBCTemplate;
     final StatusJDBCTemplate statusJDBCTemplate;
