@@ -37,7 +37,7 @@ public class UserController {
             return new ResponseEntity<User>(user1, HttpStatus.CONFLICT);
         } catch (EmptyResultDataAccessException e) {
             userJDBCTemplate.create(nickname, user.getFullname(), user.getAbout(), user.getEmail());
-            return new ResponseEntity<Object>(user, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
         }
     }
 
