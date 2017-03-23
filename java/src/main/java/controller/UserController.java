@@ -1,11 +1,11 @@
 package controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import models.status.StatusJDBCTemplate;
 import models.user.User;
 import models.user.UserJDBCTemplate;
-import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -33,11 +33,10 @@ public class UserController {
             return new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST);
         }
         try {
-            User user1 = userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail());
-            return new ResponseEntity<User>(user1, HttpStatus.CONFLICT);
+            return new ResponseEntity<List<User>>(userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail()), HttpStatus.CONFLICT);
         } catch (EmptyResultDataAccessException e) {
             userJDBCTemplate.create(nickname, user.getFullname(), user.getAbout(), user.getEmail());
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
+            return new ResponseEntity<User>(user, HttpStatus.CREATED);
         }
     }
 

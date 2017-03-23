@@ -63,9 +63,9 @@ public class UserJDBCTemplate implements UserDAO {
     }
 
     @Override
-    public User getUserByNicknameAndEmail(String nickname, String email) {
+    public List<User> getUserByNicknameAndEmail(String nickname, String email) {
         String SQL = "select * from M_user where nickname = ? OR email = ?";
-        User user = jdbcTemplate.queryForObject(SQL,new Object[] { nickname, email }, new UserMapper());
+        List<User> user = jdbcTemplate.query(SQL, new UserMapper(), nickname, email);
         LOGGER.debug("getUserByNicknameAndEmail success");
         return user;
     }

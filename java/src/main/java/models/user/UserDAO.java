@@ -1,6 +1,7 @@
 package models.user;
 
 import java.util.List;
+import javax.jws.soap.SOAPBinding;
 import javax.sql.DataSource;
 
 interface UserDAO {
@@ -32,7 +33,7 @@ interface UserDAO {
 
     public User getUserByNickname(String nickname);
 
-    public User getUserByNicknameAndEmail(String nickname, String Email);
+    public List<User> getUserByNicknameAndEmail(String nickname, String Email);
 
     public User getUserByEmail(String email);
 
