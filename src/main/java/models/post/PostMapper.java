@@ -1,5 +1,7 @@
 package models.post;
 
+import models.thread.Thread;
+import models.thread.ThreadMapper;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -13,13 +15,13 @@ public class PostMapper implements RowMapper<Post> {
     public Post mapRow(ResultSet resultSet, int i) throws SQLException {
         Post post = new Post();
         post.setAuthor(resultSet.getString("author"));
-        post.setCreated(resultSet.getTimestamp("created"));
+        post.setCreated(ThreadMapper.fromTimestamp(resultSet.getTimestamp("created")));
         post.setForum(resultSet.getString("forum"));
         post.setId(resultSet.getInt("id"));
         post.setMessage(resultSet.getString("message"));
         post.setParentId(resultSet.getInt("parent_id"));
         post.setThread(resultSet.getInt("thread"));
-        post.setEdited(resultSet.getBoolean("isEdited"));
+        post.setIsEdited(resultSet.getBoolean("isEdited"));
         return post;
     }
 }

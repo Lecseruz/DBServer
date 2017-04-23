@@ -13,7 +13,7 @@ public class Post {
     private boolean isEdited;
     private String forum;
     private int thread;
-    private Timestamp created;
+    private String created;
 
     public int getId() {
         return id;
@@ -47,12 +47,12 @@ public class Post {
         this.message = message;
     }
 
-    public boolean isEdited() {
+    public boolean getIsEdited() {
         return isEdited;
     }
 
-    public void setEdited(boolean edited) {
-        isEdited = edited;
+    public void setIsEdited(boolean isEdited) {
+        isEdited = isEdited;
     }
 
     public String getForum() {
@@ -71,11 +71,11 @@ public class Post {
         this.thread = thread;
     }
 
-    public Timestamp getCreated() {
+    public String getCreated() {
         return created;
     }
 
-    public void setCreated(Timestamp created) {
+    public void setCreated(String created) {
         this.created = created;
     }
 }

@@ -1,6 +1,7 @@
 package models.post;
 
 import models.thread.ThreadJDBCTemplate;
+import models.thread.ThreadMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -53,11 +54,18 @@ public class PostJDBCTemplate implements PostDAO {
 
     }
 
-    @Override
-    public void create(Integer id, int parent, String author, String message, boolean isEdited, String forum, int thread, Timestamp created) {
-        String SQL = "insert into post (id, parent_id, author, message, isEdited, forum, thread, created) values (?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(SQL, id, parent, author, message, isEdited, forum, thread, created);
-        LOGGER.debug("created" + id + " with user ");
+    public void createPosts(List<Post> posts) {
+        String SQL = "insert into post (parent_id, author, message, isEdited, forum, thread, created) values (?, ?, ?, ?, ?, ?, ?)";
+        for (Post post : posts) {
+            jdbcTemplate.update(SQL, post.getParentId(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), ThreadMapper.toTimestamp(post.getCreated()));
+        }
+        LOGGER.debug("create posts with user ");
+    }
+
+    public void create(Post post) {
+        String SQL = "insert into post (parent_id, author, message, isEdited, forum, thread, created) values (?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(SQL, post.getParentId(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), ThreadMapper.toTimestamp(post.getCreated()));
+        LOGGER.debug("created" + post.getId() + " with user ");
     }
 
     public int getCount(){

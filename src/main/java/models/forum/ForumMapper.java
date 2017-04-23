@@ -12,10 +12,10 @@ public class ForumMapper implements RowMapper<Forum> {
     public Forum mapRow(ResultSet rs, int rowNum) throws SQLException {
         Forum forum = new Forum();
         forum.setTitle(rs.getString("title"));
-        forum.setSlag(rs.getString("slug"));
+        forum.setSlug(rs.getString("slug"));
         forum.setThread(rs.getInt("threads"));
         forum.setPosts(rs.getInt("posts"));
-        forum.setNickname(rs.getString("nickname"));
+        forum.setUser(rs.getString("admin"));
 
         return forum;
     }

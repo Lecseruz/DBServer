@@ -33,10 +33,10 @@ public class UserController {
             return new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST);
         }
         try {
-            return new ResponseEntity<List<User>>(userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail()), HttpStatus.CONFLICT);
-        } catch (EmptyResultDataAccessException e) {
             userJDBCTemplate.create(nickname, user.getFullname(), user.getAbout(), user.getEmail());
             return new ResponseEntity<User>(user, HttpStatus.CREATED);
+        } catch (DuplicateKeyException e) {
+            return new ResponseEntity<List<User>>(userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail()), HttpStatus.CONFLICT);
         }
     }
 
@@ -54,20 +54,24 @@ public class UserController {
     @RequestMapping(value = "/profile", method = RequestMethod.POST)
     public ResponseEntity<?> UpdateUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
         user.setNickname(nickname);
-        if (user.isEmpty()) {
-            return new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST);
-        }
         try {
-            User user1 = userJDBCTemplate.getUserByNickname(nickname);
+            userJDBCTemplate.getUserByNickname(nickname);
+            if (user.getFullname() != null){
+                userJDBCTemplate.updateFullname(user.getFullname(), nickname);
+            }
+            if (user.getAbout() != null){
+                userJDBCTemplate.updateAbbout(user.getAbout(), nickname);
+            }
+            if (user.getEmail() != null){
+                userJDBCTemplate.updateEmail(user.getEmail(), nickname);
+            }
         } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
 
-        try{
-            userJDBCTemplate.update(user.getNickname(), user.getAbout(), user.getFullname(), user.getEmail());
-        } catch (DuplicateKeyException d){
+        catch (DuplicateKeyException d){
             return new ResponseEntity<Object>(null, HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<User>(user, HttpStatus.OK);
+        return new ResponseEntity<User>(userJDBCTemplate.getUserByNickname(nickname), HttpStatus.OK);
     }
 }

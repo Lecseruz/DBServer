@@ -28,7 +28,7 @@ import org.springframework.context.annotation.ComponentScan;
  *  6. В @RestController'е Spring находит методы помеченные @RequestMapping, запоминает их, чтобы DispatcherServlet, потом, смог произвести вызов
  *  на соответствующий http-запрос.
  */
-@ComponentScan(basePackages = "controller, com.zetcode, models")
+@ComponentScan(basePackages = "controller, models")
 @ConfigurationProperties("spring.datasource")
 @SpringBootApplication
 public class Application {

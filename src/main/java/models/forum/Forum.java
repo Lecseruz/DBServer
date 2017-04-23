@@ -5,8 +5,8 @@ package models.forum;
  */
 public class Forum {
     private String title;
-    private String nickname;
-    private String slag;
+    private String user;
+    private String slug;
     private int posts;
     private int thread;
 
@@ -22,20 +22,20 @@ public class Forum {
         this.title = title;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getUser() {
+        return user;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public String getSlag() {
-        return slag;
+    public String getSlug() {
+        return slug;
     }
 
-    public void setSlag(String slag) {
-        this.slag = slag;
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
     public int getPosts() {
@@ -43,7 +43,7 @@ public class Forum {
     }
 
     public void print(){
-        System.out.print(title + nickname + slag + posts + thread);
+        System.out.print(title + user + slug + posts + thread);
     }
     public void setPosts(int posts) {
         this.posts = posts;

@@ -37,6 +37,12 @@ interface UserDAO {
 
     public User getUserByEmail(String email);
 
+    public void updateFullname(String fullname, String nickname);
+
+    public void updateAbbout(String about, String nickname);
+
+    public void updateEmail(String email, String nickname);
+
     /**
      * This is the method to be used to delete
      * a record from the Student table corresponding

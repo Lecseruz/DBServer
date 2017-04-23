@@ -15,8 +15,6 @@ public interface PostDAO {
 
     public void  dropTable();
 
-    public void create(Integer id,  int parent, String author, String message, boolean isEdited, String forum, int thread, Timestamp created);
-
     /**
      * This is the method to be used to delete
      * a record from the Student table corresponding

@@ -56,18 +56,22 @@ public class UserJDBCTemplate implements UserDAO {
 
     @Override
     public User getUserByNickname(String nickname) {
-        String SQL = "select * from M_user where nickname = ?";
-        User users = jdbcTemplate.queryForObject(SQL, new Object[] { nickname }, new UserMapper());
+        String SQL = "select * from m_user where LOWER(nickname) = LOWER(?)";
+        User users = jdbcTemplate.queryForObject(SQL,new UserMapper(), nickname);
         LOGGER.debug("getUserByNickname success");
         return users;
     }
 
     @Override
     public List<User> getUserByNicknameAndEmail(String nickname, String email) {
-        String SQL = "select * from M_user where nickname = ? OR email = ?";
+        final String SQL = "SELECT * FROM m_user WHERE LOWER(nickname) = LOWER(?) OR LOWER(email) = LOWER(?)";
         List<User> user = jdbcTemplate.query(SQL, new UserMapper(), nickname, email);
-        LOGGER.debug("getUserByNicknameAndEmail success");
-        return user;
+        if (user.isEmpty()) {
+            return null;
+        } else {
+            LOGGER.debug("getUserByNicknameAndEmail success");
+            return user;
+        }
     }
 
     @Override
@@ -78,12 +82,32 @@ public class UserJDBCTemplate implements UserDAO {
         return users;
     }
 
+    @Override
+    public void updateFullname(String fullname, String nickname) {
+        String SQL = "update m_user set fullname = ? where LOWER(nickname) = LOWER(?)";
+        jdbcTemplate.update(SQL, fullname, nickname);
+        LOGGER.debug("Updated fullname" );
+    }
+
+    @Override
+    public void updateAbbout(String about, String nickname) {
+        String SQL = "update m_user set abbout = ? where LOWER(nickname) = LOWER(?)";
+        jdbcTemplate.update(SQL, about, nickname);
+        LOGGER.debug("Updated about" );
+    }
+
+    @Override
+    public void updateEmail(String email, String nickname) {
+        String SQL = "update m_user set email = ? where LOWER(nickname) = LOWER(?)";
+        jdbcTemplate.update(SQL, email, nickname);
+        LOGGER.debug("Updated email" );
+    }
 
     @Override
     public void delete() {
         String SQL = "delete from m_user";
         jdbcTemplate.update(SQL);
-        System.out.println("Deleted success" );
+        LOGGER.debug("Deleted success" );
     }
 
     @Override
@@ -105,6 +129,6 @@ public class UserJDBCTemplate implements UserDAO {
     public void update(String nickname, String about, String fullname, String email) {
         String SQL = "update m_user set fullname = ?, abbout = ?, email = ? where nickname = ?";
         jdbcTemplate.update(SQL, fullname, about, email, nickname);
-        System.out.println("Updated" );
+        LOGGER.debug("Updated" );
     }
 }

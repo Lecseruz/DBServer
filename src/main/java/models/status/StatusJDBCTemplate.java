@@ -29,8 +29,8 @@ public class StatusJDBCTemplate implements StatusDAO {
         this.forumJDBCTemplate = forumJDBCTemplate;
         this.threadJDBCTemplate = threadJDBCTemplate;
         this.postJDBCTemplate = postJDBCTemplate;
-        dropTable();
-        createTable();
+//        dropTable();
+//        createTable();
     }
 
     @Override

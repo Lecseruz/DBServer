@@ -22,18 +22,12 @@ import java.io.IOException;
 @RequestMapping(value = "/api/service")
 public class ServiceController {
     private final StatusJDBCTemplate statusJDBCTemplate;
-    private final ThreadJDBCTemplate threadJDBCTemplate;
-    private final ForumJDBCTemplate forumJDBCTemplate;
-    private final PostJDBCTemplate postJDBCTemplate;
-    private final UserJDBCTemplate userJDBCTemplate;
 
     @Autowired
-    public ServiceController(StatusJDBCTemplate statusJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate, ForumJDBCTemplate forumJDBCTemplate, PostJDBCTemplate postJDBCTemplate, UserJDBCTemplate userJDBCTemplate) {
+    public ServiceController(StatusJDBCTemplate statusJDBCTemplate) {
         this.statusJDBCTemplate = statusJDBCTemplate;
-        this.threadJDBCTemplate = threadJDBCTemplate;
-        this.forumJDBCTemplate = forumJDBCTemplate;
-        this.userJDBCTemplate = userJDBCTemplate;
-        this.postJDBCTemplate = postJDBCTemplate;
+        statusJDBCTemplate.dropTable();
+        statusJDBCTemplate.createTable();
     }
 
     @RequestMapping(value = "/service/clear", method = RequestMethod.GET)
