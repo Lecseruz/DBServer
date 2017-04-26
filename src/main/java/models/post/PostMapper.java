@@ -1,6 +1,5 @@
 package models.post;
 
-import models.thread.Thread;
 import models.thread.ThreadMapper;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -19,7 +18,7 @@ public class PostMapper implements RowMapper<Post> {
         post.setForum(resultSet.getString("forum"));
         post.setId(resultSet.getInt("id"));
         post.setMessage(resultSet.getString("message"));
-        post.setParentId(resultSet.getInt("parent_id"));
+        post.setParent(resultSet.getInt("parent_id"));
         post.setThread(resultSet.getInt("thread"));
         post.setIsEdited(resultSet.getBoolean("isEdited"));
         return post;

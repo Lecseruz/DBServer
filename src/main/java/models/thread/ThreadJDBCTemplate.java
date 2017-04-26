@@ -112,7 +112,7 @@ public class ThreadJDBCTemplate {
     public int getCount() {
         String SQL = "select COUNT(*) from thread";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        LOGGER.debug("getVoice success");
+        LOGGER.debug("getVoiceWithNickname success");
         return count;
     }
     public int updateVoice(String slug, int count){

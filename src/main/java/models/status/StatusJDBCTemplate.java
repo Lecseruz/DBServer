@@ -4,6 +4,7 @@ import models.forum.ForumJDBCTemplate;
 import models.post.PostJDBCTemplate;
 import models.thread.ThreadJDBCTemplate;
 import models.user.UserJDBCTemplate;
+import models.voice.VoiceJDBCTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -21,16 +22,16 @@ public class StatusJDBCTemplate implements StatusDAO {
     private final ForumJDBCTemplate forumJDBCTemplate;
     private final PostJDBCTemplate postJDBCTemplate;
     private final ThreadJDBCTemplate threadJDBCTemplate;
+    private final VoiceJDBCTemplate voiceJDBCTemplate;
 
     @Autowired
-    public StatusJDBCTemplate(JdbcTemplate jdbcTemplate, UserJDBCTemplate userJDBCTemplate, ForumJDBCTemplate forumJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate) {
+    public StatusJDBCTemplate(VoiceJDBCTemplate voiceJDBCTemplate, JdbcTemplate jdbcTemplate, UserJDBCTemplate userJDBCTemplate, ForumJDBCTemplate forumJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.userJDBCTemplate = userJDBCTemplate;
         this.forumJDBCTemplate = forumJDBCTemplate;
         this.threadJDBCTemplate = threadJDBCTemplate;
         this.postJDBCTemplate = postJDBCTemplate;
-//        dropTable();
-//        createTable();
+        this.voiceJDBCTemplate = voiceJDBCTemplate;
     }
 
     @Override
@@ -44,6 +45,7 @@ public class StatusJDBCTemplate implements StatusDAO {
         forumJDBCTemplate.createTable();
         postJDBCTemplate.createTable();
         threadJDBCTemplate.createTable();
+        voiceJDBCTemplate.createTable();
     }
 
     @Override
@@ -52,5 +54,6 @@ public class StatusJDBCTemplate implements StatusDAO {
         forumJDBCTemplate.dropTable();
         threadJDBCTemplate.dropTable();
         userJDBCTemplate.dropTable();
+        voiceJDBCTemplate.dropTable();
     }
 }

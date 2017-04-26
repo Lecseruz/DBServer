@@ -1,13 +1,11 @@
 package models.post;
 
-import java.sql.Timestamp;
-
 /**
  * Created by magomed on 19.03.17.
  */
 public class Post {
     private int id;
-    private int parentId;
+    private int parent;
     private String author;
     private String message;
     private boolean isEdited;
@@ -23,12 +21,12 @@ public class Post {
         this.id = id;
     }
 
-    public int getParentId() {
-        return parentId;
+    public int getParent() {
+        return parent;
     }
 
-    public void setParentId(int parentId) {
-        this.parentId = parentId;
+    public void setParent(int parent) {
+        this.parent = parent;
     }
 
     public String getAuthor() {

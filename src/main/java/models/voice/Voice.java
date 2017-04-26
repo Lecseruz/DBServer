@@ -1,4 +1,4 @@
-package models.thread;
+package models.voice;
 
 /**
  * Created by magomed on 26.04.17.
@@ -7,7 +7,6 @@ public class Voice {
     private String nickname;
 
     private int voice;
-
 
     public String getNickname() {
         return nickname;

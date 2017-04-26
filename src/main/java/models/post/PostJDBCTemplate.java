@@ -8,8 +8,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -57,21 +55,21 @@ public class PostJDBCTemplate implements PostDAO {
     public void createPosts(List<Post> posts) {
         String SQL = "insert into post (parent_id, author, message, isEdited, forum, thread, created) values (?, ?, ?, ?, ?, ?, ?)";
         for (Post post : posts) {
-            jdbcTemplate.update(SQL, post.getParentId(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), ThreadMapper.toTimestamp(post.getCreated()));
+            jdbcTemplate.update(SQL, post.getParent(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), ThreadMapper.toTimestamp(post.getCreated()));
         }
         LOGGER.debug("create posts with user ");
     }
 
     public void create(Post post) {
         String SQL = "insert into post (parent_id, author, message, isEdited, forum, thread, created) values (?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(SQL, post.getParentId(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), ThreadMapper.toTimestamp(post.getCreated()));
+        jdbcTemplate.update(SQL, post.getParent(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), ThreadMapper.toTimestamp(post.getCreated()));
         LOGGER.debug("created" + post.getId() + " with user ");
     }
 
     public int getCount(){
         String SQL = "select COUNT(*) from post";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        LOGGER.debug("getVoice success");
+        LOGGER.debug("getVoiceWithNickname success");
         return count;
     }
 
