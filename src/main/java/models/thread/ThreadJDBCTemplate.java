@@ -3,10 +3,6 @@ package models.thread;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.sql.Timestamp;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -66,20 +62,6 @@ public class ThreadJDBCTemplate {
         thread.setId(id);
     }
 
-//    public void create(String title, String author, String forum, String message, int votes, String slug, String created) {
-//        String SQL;
-//        int id = 0;
-//        if (created != null) {
-//            SQL = "insert into Thread ( title, author, forum, message, votes, slug, created) values (?, ?, ?, ?, ?, ?, ?) RETURNING id";
-//            id = jdbcTemplate.queryForObject(SQL, Integer.class, title, author, forum, message, votes, slug, ThreadMapper.toTimestamp(created));
-//        } else{
-//            SQL = "insert into Thread ( title, author, forum, message, votes, slug) values (?, ?, ?, ?, ?, ?) RETURNING id";
-//            id = jdbcTemplate.queryForObject(SQL, Integer.class, title, author, forum, message, votes, slug);
-//        }
-//        LOGGER.debug("created" + title + " with user ");
-////        thread.setId(id);
-//    }
-//
     public Thread getThreadById(int id) {
         String SQL = "select * from thread where id = ?";
         Thread thread = jdbcTemplate.queryForObject(SQL, new Object[] { id }, new ThreadMapper());
@@ -130,7 +112,12 @@ public class ThreadJDBCTemplate {
     public int getCount() {
         String SQL = "select COUNT(*) from thread";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        LOGGER.debug("getCount success");
+        LOGGER.debug("getVoice success");
         return count;
+    }
+    public int updateVoice(String slug, int count){
+        String SQL = "update thread set votes = ? where lower(slug) = lower(?) RETURNING votes";
+        int voice = jdbcTemplate.queryForObject(SQL, Integer.class, count, slug);
+        return voice;
     }
 }

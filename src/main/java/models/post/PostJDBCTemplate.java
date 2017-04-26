@@ -71,7 +71,7 @@ public class PostJDBCTemplate implements PostDAO {
     public int getCount(){
         String SQL = "select COUNT(*) from post";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        LOGGER.debug("getCount success");
+        LOGGER.debug("getVoice success");
         return count;
     }
 

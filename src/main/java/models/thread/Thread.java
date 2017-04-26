@@ -1,10 +1,7 @@
 package models.thread;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.sql.Timestamp;
 
 /**
  * Created by magomed on 18.03.17.

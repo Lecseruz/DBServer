@@ -114,7 +114,7 @@ public class UserJDBCTemplate implements UserDAO {
     public int getCount() {
         String SQL = "select COUNT(*) from M_user";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        LOGGER.debug("getCount success");
+        LOGGER.debug("getVoice success");
         return count;
     }
 

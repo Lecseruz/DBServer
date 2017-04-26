@@ -1,16 +1,14 @@
 package controller;
 
-import models.forum.Forum;
 import models.forum.ForumJDBCTemplate;
 import models.post.Post;
 import models.post.PostJDBCTemplate;
 import models.status.StatusJDBCTemplate;
 import models.thread.Thread;
 import models.thread.ThreadJDBCTemplate;
-import models.user.User;
+import models.thread.Voice;
 import models.user.UserJDBCTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,10 +42,10 @@ public class ThreadController {
     @RequestMapping(value = "/{slug}/create", method = RequestMethod.POST)
     public ResponseEntity<?> createThread(@PathVariable(value = "slug") String slug, @RequestBody List<Post> posts) throws IOException {
         try {
-            int a;
+
             Thread thread = null;
             try {
-                a = Integer.parseInt(slug);
+                int a = Integer.parseInt(slug);
                 thread = threadJDBCTemplate.getThreadById(a);
             } catch (NumberFormatException ignored) {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
@@ -65,5 +63,26 @@ public class ThreadController {
             post.setId(1);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(posts);
+    }
+
+    @RequestMapping(value = "/{slug}/vote", method = RequestMethod.POST)
+    public ResponseEntity<?> createVoice(@PathVariable(value = "slug") String slug, @RequestBody Voice voice) throws IOException {
+        try {
+            Thread thread = null;
+            try {
+                int a = Integer.parseInt(slug);
+                thread = threadJDBCTemplate.getThreadById(a);
+            } catch (NumberFormatException ignored) {
+                thread = threadJDBCTemplate.getThreadBySlug(slug);
+            }
+            if (voice.getVoice() == 1){
+                thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() + 1));
+            } else {
+                thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() - 1));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(thread);
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 }
