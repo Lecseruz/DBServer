@@ -21,13 +21,12 @@ public class VoiceJDBCTemplate {
     }
 
     public void createTable() {
-        String query = new StringBuilder()
-                .append("CREATE EXTENSION IF NOT EXISTS citext; ")
-                .append("CREATE TABLE IF NOT EXISTS voice ( ")
-                .append("id SERIAL PRIMARY KEY, ")
-                .append("nickname CITEXT UNIQUE NOT NULL, ")
-                .append("count int NOT NULL); ")
-                .toString();
+        String query =
+                "CREATE EXTENSION IF NOT EXISTS citext; " +
+                        "CREATE TABLE IF NOT EXISTS voice ( " +
+                        "id SERIAL PRIMARY KEY, " +
+                        "nickname CITEXT UNIQUE NOT NULL, " +
+                        "count int NOT NULL); ";
         LOGGER.debug(query + "success");
 
         jdbcTemplate.execute(query);
@@ -39,23 +38,24 @@ public class VoiceJDBCTemplate {
         jdbcTemplate.execute(query);
         LOGGER.debug("drop table success");
     }
-    public int createVoice(Voice voice){
-        String SQL = "insert into voice (nickname, count) values(?,?) returning id";
+
+    public int createVoice(Voice voice) {
+        String SQL = "INSERT INTO voice (nickname, count) VALUES(?,?) RETURNING id";
         int id = jdbcTemplate.queryForObject(SQL, Integer.class, voice.getNickname(), voice.getVoice());
         LOGGER.debug("create succes");
         return id;
     }
 
-    public Voice getVoiceWithNickname(String nickname){
-        String SQL = "select * from voice where LOWER(nickname) = LOWER(?)";
+    public Voice getVoiceWithNickname(String nickname) {
+        String SQL = "SELECT * FROM voice WHERE LOWER(nickname) = LOWER(?)";
         Voice voice = jdbcTemplate.queryForObject(SQL, new VoiceMapper(), nickname);
         LOGGER.debug("succes");
         return voice;
     }
 
-    public int updateVoice(int count, String nickname){
-        String SQL = "update voice set count = ? WHERE LOWER(nickname) = LOWER(?) returning id";
-        int id  = jdbcTemplate.queryForObject(SQL, Integer.class, count, nickname);
-        return id;
+    public void updateVoice(int count, String nickname) {
+        String SQL = "UPDATE voice SET count = ? WHERE LOWER(nickname) = LOWER(?)";
+        jdbcTemplate.update(SQL, count, nickname);
+        LOGGER.debug("update success");
     }
 }

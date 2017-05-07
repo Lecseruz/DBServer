@@ -1,5 +1,6 @@
 package models.thread;
 
+import config.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -22,26 +23,25 @@ public class ThreadJDBCTemplate {
     }
 
     public void createTable() {
-        String query = new StringBuilder()
-                .append("CREATE EXTENSION IF NOT EXISTS citext; ")
-                .append("CREATE TABLE IF NOT EXISTS thread ( ")
-                .append("id SERIAL PRIMARY KEY, ")
-                .append("title VARCHAR(128) NOT NULL, ")
-                .append("author CITEXT NOT NULL, ")
-                .append("forum CITEXT NOT NULL, ")
-                .append("message TEXT NOT NULL, ")
-                .append("votes BIGINT NOT NULL DEFAULT 0, ")
-                .append("slug CITEXT UNIQUE, ")
-                .append("created TIMESTAMP NOT NULL DEFAULT current_timestamp, ")
-                .append("FOREIGN KEY (author) REFERENCES m_user(nickname)); ")
-                .toString();
-        LOGGER.debug( query + "success");
+        final String query =
+                "CREATE EXTENSION IF NOT EXISTS citext; " +
+                        "CREATE TABLE IF NOT EXISTS thread ( " +
+                        "id SERIAL PRIMARY KEY, " +
+                        "title VARCHAR(128) NOT NULL, " +
+                        "author CITEXT NOT NULL, " +
+                        "forum CITEXT NOT NULL, " +
+                        "message TEXT NOT NULL, " +
+                        "votes BIGINT NOT NULL DEFAULT 0, " +
+                        "slug CITEXT UNIQUE, " +
+                        "created TIMESTAMP NOT NULL DEFAULT current_timestamp, " +
+                        "FOREIGN KEY (author) REFERENCES m_user(nickname)); ";
+        LOGGER.debug(query + "success");
 
         jdbcTemplate.execute(query);
     }
 
     public void dropTable() {
-        String query = "DROP TABLE IF EXISTS thread";
+        String query = "DROP TABLE IF EXISTS thread CASCADE ";
 
         jdbcTemplate.execute(query);
         LOGGER.debug("drop table success");
@@ -52,50 +52,60 @@ public class ThreadJDBCTemplate {
         String SQL;
         int id = 0;
         if (thread.getCreated() != null) {
-            SQL = "insert into Thread ( title, author, forum, message, votes, slug, created) values (?, ?, ?, ?, ?, ?, ?) RETURNING id";
-             id = jdbcTemplate.queryForObject(SQL, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getVotes(), thread.getSlug(), ThreadMapper.toTimestamp(thread.getCreated()));
-        } else{
-            SQL = "insert into Thread ( title, author, forum, message, votes, slug) values (?, ?, ?, ?, ?, ?) RETURNING id";
+            SQL = "INSERT INTO Thread ( title, author, forum, message, votes, slug, created) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
+            id = jdbcTemplate.queryForObject(SQL, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getVotes(), thread.getSlug(), TimestampHelper.toTimestamp(thread.getCreated()));
+        } else {
+            SQL = "INSERT INTO Thread ( title, author, forum, message, votes, slug) VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
             id = jdbcTemplate.queryForObject(SQL, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getVotes(), thread.getSlug());
         }
+        String subQuery =
+                "UPDATE forum SET threads = threads + 1 " +
+                "WHERE slug = ? ;";
+        jdbcTemplate.update(subQuery, thread.getForum());
         LOGGER.debug("created" + thread.getTitle() + " with user ");
         thread.setId(id);
     }
 
+    public void updateThread(ThreadUpdate threadUpdate, String slug){
+        String SQL = "UPDATE thread SET title = ?, message = ? WHERE lower(slug) = lower(?)";
+        jdbcTemplate.update(SQL, threadUpdate.getTitle(), threadUpdate.getMessage(), slug);
+        LOGGER.debug("updateThread success");
+    }
+
     public Thread getThreadById(int id) {
-        String SQL = "select * from thread where id = ?";
-        Thread thread = jdbcTemplate.queryForObject(SQL, new Object[] { id }, new ThreadMapper());
-        LOGGER.debug("getThreadById success" );
+        String SQL = "SELECT * FROM thread WHERE id = ?";
+        Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{id}, new ThreadMapper());
+        LOGGER.debug("getThreadById success");
         return thread;
     }
 
     public Thread getThreadBySlug(String slug) {
-        String SQL = "select * from thread where lower(slug) = lower(?)";
-        Thread thread = jdbcTemplate.queryForObject(SQL, new Object[] { slug }, new ThreadMapper());
-        LOGGER.debug("getThreadById success" );
+        String SQL = "SELECT * FROM thread WHERE lower(slug) = lower(?)";
+        Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{slug}, new ThreadMapper());
+        LOGGER.debug("getThreadById success");
         return thread;
     }
 
-    public List<Thread> getThreads(String slug, boolean desc, int limit, String timestamp){
+    public List<Thread> getThreads(String slug, boolean desc, int limit, String timestamp) {
         String SQL = "select * from thread where LOWER(forum) = LOWER(?)";
         List<Thread> threads = null;
-        if (!timestamp.equals("")){
-            if (desc){
+        if (!timestamp.equals("")) {
+            if (desc) {
                 SQL += "AND created <= ?";
             } else {
                 SQL += "AND created >= ?";
             }
         }
-        if (desc){
+        if (desc) {
             SQL += " order by created desc";
         } else {
             SQL += " order by created";
         }
-        if (limit > 0){
+        if (limit > 0) {
             SQL += " limit " + limit;
         }
-        if (!timestamp.isEmpty()){
-            threads = jdbcTemplate.query(SQL, new ThreadMapper(), slug, ThreadMapper.toTimestamp(timestamp));
+        if (!timestamp.isEmpty()) {
+            threads = jdbcTemplate.query(SQL, new ThreadMapper(), slug, TimestampHelper.toTimestamp(timestamp));
         } else {
             threads = jdbcTemplate.query(SQL, new ThreadMapper(), slug);
         }
@@ -104,20 +114,22 @@ public class ThreadJDBCTemplate {
     }
 
     public void delete() {
-        String SQL = "delete from thread";
+        String SQL = "DELETE FROM thread";
         jdbcTemplate.update(SQL);
-        LOGGER.debug("Deleted Record" );
+        LOGGER.debug("Deleted Record");
     }
 
     public int getCount() {
-        String SQL = "select COUNT(*) from thread";
+        String SQL = "SELECT COUNT(*) FROM thread";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
         LOGGER.debug("getVoiceWithNickname success");
         return count;
     }
-    public int updateVoice(String slug, int count){
-        String SQL = "update thread set votes = ? where lower(slug) = lower(?) RETURNING votes";
+
+    public int updateVoice(String slug, int count) {
+        String SQL = "UPDATE thread SET votes = ? WHERE lower(slug) = lower(?) RETURNING votes";
         int voice = jdbcTemplate.queryForObject(SQL, Integer.class, count, slug);
+        LOGGER.debug("updateVoice success");
         return voice;
     }
 }

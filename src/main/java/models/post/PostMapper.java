@@ -1,6 +1,6 @@
 package models.post;
 
-import models.thread.ThreadMapper;
+import config.TimestampHelper;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -14,7 +14,7 @@ public class PostMapper implements RowMapper<Post> {
     public Post mapRow(ResultSet resultSet, int i) throws SQLException {
         Post post = new Post();
         post.setAuthor(resultSet.getString("author"));
-        post.setCreated(ThreadMapper.fromTimestamp(resultSet.getTimestamp("created")));
+        post.setCreated(TimestampHelper.fromTimestamp(resultSet.getTimestamp("created")));
         post.setForum(resultSet.getString("forum"));
         post.setId(resultSet.getInt("id"));
         post.setMessage(resultSet.getString("message"));

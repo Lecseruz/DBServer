@@ -1,11 +1,12 @@
 package controller;
 
-import models.forum.ForumJDBCTemplate;
+import models.ResponseObject.ResponsePosts;
 import models.post.Post;
 import models.post.PostJDBCTemplate;
 import models.status.StatusJDBCTemplate;
 import models.thread.Thread;
 import models.thread.ThreadJDBCTemplate;
+import models.thread.ThreadUpdate;
 import models.voice.Voice;
 import models.user.UserJDBCTemplate;
 import models.voice.VoiceJDBCTemplate;
@@ -25,31 +26,23 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/api/thread")
 public class ThreadController {
-    private int id = 0;
-    private final ForumJDBCTemplate forumJDBCTemplate;
-    private final StatusJDBCTemplate statusJDBCTemplate;
-    private final UserJDBCTemplate userJDBCTemplate;
     private final ThreadJDBCTemplate threadJDBCTemplate;
     private final PostJDBCTemplate postJDBCTemplate;
     private final VoiceJDBCTemplate voiceJDBCTemplate;
 
     @Autowired
-    public ThreadController(ForumJDBCTemplate forumJDBCTemplate, VoiceJDBCTemplate voiceJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate, StatusJDBCTemplate statusJDBCTemplate, UserJDBCTemplate userJDBCTemplate) {
-        this.forumJDBCTemplate = forumJDBCTemplate;
-        this.statusJDBCTemplate = statusJDBCTemplate;
-        this.userJDBCTemplate = userJDBCTemplate;
+    public ThreadController(VoiceJDBCTemplate voiceJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate, StatusJDBCTemplate statusJDBCTemplate, UserJDBCTemplate userJDBCTemplate) {
         this.threadJDBCTemplate = threadJDBCTemplate;
         this.postJDBCTemplate = postJDBCTemplate;
         this.voiceJDBCTemplate = voiceJDBCTemplate;
     }
 
-    @RequestMapping(value = "/{slug}/create", method = RequestMethod.POST)
-    public ResponseEntity<?> createThread(@PathVariable(value = "slug") String slug, @RequestBody List<Post> posts) throws IOException {
+    @RequestMapping(value = "/{slug_or_id}/create", method = RequestMethod.POST)
+    public ResponseEntity<?> createThread(@PathVariable(value = "slug_or_id") String slug, @RequestBody List<Post> posts) throws IOException {
         try {
-
             Thread thread = null;
             try {
-                int a = Integer.parseInt(slug);
+                final int a = Integer.parseInt(slug);
                 thread = threadJDBCTemplate.getThreadById(a);
             } catch (NumberFormatException ignored) {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
@@ -65,18 +58,18 @@ public class ThreadController {
         postJDBCTemplate.createPosts(posts);
         for (Post post : posts) {
             post.setId(1);
+            System.out.println(post.getParent());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(posts);
     }
 
 
-
-    @RequestMapping(value = "/{slug}/vote", method = RequestMethod.POST)
-    public ResponseEntity<?> createVoice(@PathVariable(value = "slug") String slug, @RequestBody Voice voice) throws IOException {
+    @RequestMapping(value = "/{slug_or_id}/vote", method = RequestMethod.POST)
+    public ResponseEntity<?> createVoice(@PathVariable(value = "slug_or_id") String slug, @RequestBody Voice voice) throws IOException {
         Thread thread = null;
         try {
             try {
-                int a = Integer.parseInt(slug);
+                final int a = Integer.parseInt(slug);
                 thread = threadJDBCTemplate.getThreadById(a);
             } catch (NumberFormatException ignored) {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
@@ -90,9 +83,9 @@ public class ThreadController {
             return ResponseEntity.status(HttpStatus.OK).body(thread);
         } catch (EmptyResultDataAccessException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (DuplicateKeyException e){
-            if (!(voice.getVoice() == voiceJDBCTemplate.getVoiceWithNickname(voice.getNickname()).getVoice())){
-                if (voice.getVoice() == 1){
+        } catch (DuplicateKeyException e) {
+            if (!(voice.getVoice() == voiceJDBCTemplate.getVoiceWithNickname(voice.getNickname()).getVoice())) {
+                if (voice.getVoice() == 1) {
                     assert thread != null;
                     thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() + 2));
                     voiceJDBCTemplate.updateVoice(voice.getVoice(), voice.getNickname());
@@ -106,19 +99,69 @@ public class ThreadController {
         }
     }
 
-    @RequestMapping(value = "/{slug}/details", method = RequestMethod.GET)
-    public ResponseEntity<?> getThread(@PathVariable(value = "slug") String slug) throws IOException {
-        Thread thread = null;
+    @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.GET)
+    public ResponseEntity<?> getThreads(@PathVariable(value = "slug_or_id") String slug) throws IOException {
         try {
+            Thread thread;
             try {
-                int a = Integer.parseInt(slug);
+                final int a = Integer.parseInt(slug);
                 thread = threadJDBCTemplate.getThreadById(a);
             } catch (NumberFormatException ignored) {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
             }
-            return ResponseEntity.status(HttpStatus.OK).body(thread);
-        }catch (EmptyResultDataAccessException e){
+            return ResponseEntity.ok(thread);
+        } catch (EmptyResultDataAccessException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.POST)
+    public ResponseEntity<?> updateThreads(@PathVariable(value = "slug_or_id") String slug, @RequestBody ThreadUpdate threadUpdate) throws IOException {
+        Thread thread;
+        try {
+            final int a = Integer.parseInt(slug);
+            thread = threadJDBCTemplate.getThreadById(a);
+        } catch (NumberFormatException ignored) {
+            thread = threadJDBCTemplate.getThreadBySlug(slug);
+        }
+        threadJDBCTemplate.updateThread(threadUpdate, thread.getSlug());
+        thread.setTitle(threadUpdate.getTitle());
+        thread.setMessage(threadUpdate.getMessage());
+        return ResponseEntity.ok(thread);
+    }
+
+    @RequestMapping(path = "/{slug_or_id}/posts", method = RequestMethod.GET)
+    public ResponseEntity postsThread(@PathVariable(name = "slug_or_id") String slug,
+                                      @RequestParam(name = "limit", required = false) Integer limit,
+                                      @RequestParam(name = "marker", required = false) String marker,
+                                      @RequestParam(name = "sort", required = false) String sort,
+                                      @RequestParam(name = "desc", required = false) Boolean desc) {
+        Thread thread;
+        try {
+            try {
+                final int a = Integer.parseInt(slug);
+                thread = threadJDBCTemplate.getThreadById(a);
+            } catch (NumberFormatException ignored) {
+                thread = threadJDBCTemplate.getThreadBySlug(slug);
+            }
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (marker == null) {
+            marker = "0";
+        }
+        if (sort == null) {
+            sort = "flat";
+        }
+        if (desc == null) {
+            desc = false;
+        }
+        final ResponsePosts responsePosts = new ResponsePosts();
+        final List<Post> posts = postJDBCTemplate.getByThread(thread.getId(), limit, marker, sort, desc);
+
+        responsePosts.setMarker("some marker");
+        responsePosts.setPosts(posts);
+        return ResponseEntity.status(HttpStatus.OK).body(responsePosts);
     }
 }

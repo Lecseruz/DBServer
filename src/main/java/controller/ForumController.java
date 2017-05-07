@@ -1,17 +1,8 @@
 package controller;
 
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-
-import models.thread.Thread;
 import models.forum.Forum;
 import models.forum.ForumJDBCTemplate;
-import models.status.StatusJDBCTemplate;
+import models.thread.Thread;
 import models.thread.ThreadJDBCTemplate;
 import models.user.User;
 import models.user.UserJDBCTemplate;
@@ -22,20 +13,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.List;
+
 
 @RestController
 @RequestMapping(value = "/api/forum")
 public class ForumController {
-    private  int id = 0;
     private final ForumJDBCTemplate forumJDBCTemplate;
-    private final StatusJDBCTemplate statusJDBCTemplate;
     private final UserJDBCTemplate userJDBCTemplate;
     private final ThreadJDBCTemplate threadJDBCTemplate;
 
     @Autowired
-    public ForumController(ForumJDBCTemplate forumJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate, StatusJDBCTemplate statusJDBCTemplate, UserJDBCTemplate userJDBCTemplate) {
+    public ForumController(ForumJDBCTemplate forumJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate, UserJDBCTemplate userJDBCTemplate) {
         this.forumJDBCTemplate = forumJDBCTemplate;
-        this.statusJDBCTemplate = statusJDBCTemplate;
         this.userJDBCTemplate = userJDBCTemplate;
         this.threadJDBCTemplate = threadJDBCTemplate;
     }
@@ -45,27 +36,27 @@ public class ForumController {
 
         try {
             userJDBCTemplate.getUserByNickname(forum.getUser());
-        }catch(EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
-        try{
+        try {
             forumJDBCTemplate.create(forum.getTitle(), forum.getUser(), forum.getSlug(), forum.getPosts(), forum.getThread());
-            User user = userJDBCTemplate.getUserByNickname(forum.getUser());
+            final User user = userJDBCTemplate.getUserByNickname(forum.getUser());
             forum.setUser(user.getNickname());
             return new ResponseEntity<Forum>(forum, HttpStatus.CREATED);
-        } catch(DuplicateKeyException e) {
+        } catch (DuplicateKeyException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(forumJDBCTemplate.getForumBySlug(forum.getSlug()));
         }
     }
 
     @RequestMapping(value = "/{slug}/details", method = RequestMethod.GET)
     public ResponseEntity<?> getWithSlug(@PathVariable(value = "slug") String slug) throws IOException {
-        try{
-            Forum forum = forumJDBCTemplate.getForumBySlug(slug);
-            User user = userJDBCTemplate.getUserByNickname(forum.getUser());
+        try {
+            final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
+            final User user = userJDBCTemplate.getUserByNickname(forum.getUser());
             forum.setUser(user.getNickname());
             return new ResponseEntity<Forum>(forum, HttpStatus.OK);
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
     }
@@ -74,29 +65,41 @@ public class ForumController {
     public ResponseEntity<?> createThread(@PathVariable(value = "slug") String slug, @RequestBody Thread thread) throws IOException {
         try {
             userJDBCTemplate.getUserByNickname(thread.getAuthor());
-            final Forum forum= forumJDBCTemplate.getForumBySlug(slug);
+            final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
             thread.setForum(forum.getSlug());
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
-        }
-        catch (NullPointerException ignored){
+        } catch (NullPointerException ignored) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
         try {
             threadJDBCTemplate.create(thread);
             return ResponseEntity.status(HttpStatus.CREATED).body(thread);
-        } catch (DuplicateKeyException e){
+        } catch (DuplicateKeyException e) {
             return new ResponseEntity<Thread>(threadJDBCTemplate.getThreadBySlug(thread.getSlug()), HttpStatus.CONFLICT);
         }
     }
+
     @RequestMapping(value = "/{slug}/threads", method = RequestMethod.GET)
     public ResponseEntity<?> getThreads(@PathVariable(value = "slug") String slug, @RequestParam(value = "desc", defaultValue = "false") boolean desc, @RequestParam(value = "limit", defaultValue = "0") int limit, @RequestParam(value = "since", defaultValue = "") String created) throws IOException {
         try {
             forumJDBCTemplate.getForumBySlug(slug);
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
-        List<Thread> threads = threadJDBCTemplate.getThreads(slug,desc,limit, created);
+        final List<Thread> threads = threadJDBCTemplate.getThreads(slug, desc, limit, created);
         return ResponseEntity.ok(threads);
+    }
+
+    @RequestMapping(value = "/{slug}/users", method = RequestMethod.GET)
+    public ResponseEntity<?> getUsers(@PathVariable(value = "slug") String slug, @RequestParam(value = "desc", required = false, defaultValue = "false") boolean desc, @RequestParam(value = "limit", required = false, defaultValue = "0") int limit, @RequestParam(value = "since", required = false, defaultValue = "") String since) throws IOException {
+        try {
+            forumJDBCTemplate.getForumBySlug(slug);
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        final int a = Integer.parseInt(since);
+        final List<User> users = forumJDBCTemplate.getUsers(slug, desc, limit, a);
+        return ResponseEntity.ok(users);
     }
 }

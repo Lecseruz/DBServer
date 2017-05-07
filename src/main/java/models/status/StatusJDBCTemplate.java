@@ -43,9 +43,9 @@ public class StatusJDBCTemplate implements StatusDAO {
     public void createTable() {
         userJDBCTemplate.createTable();
         forumJDBCTemplate.createTable();
-        postJDBCTemplate.createTable();
         threadJDBCTemplate.createTable();
         voiceJDBCTemplate.createTable();
+        postJDBCTemplate.createTable();
     }
 
     @Override

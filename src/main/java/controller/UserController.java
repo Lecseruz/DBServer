@@ -42,9 +42,8 @@ public class UserController {
 
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public ResponseEntity<?> getUser(@PathVariable(value = "nickname") String nickname) throws IOException {
-        User user = null;
         try {
-            user = userJDBCTemplate.getUserByNickname(nickname);
+            final User user = userJDBCTemplate.getUserByNickname(nickname);
             return new ResponseEntity<User>(user, HttpStatus.OK);
         } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
@@ -52,7 +51,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/profile", method = RequestMethod.POST)
-    public ResponseEntity<?> UpdateUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
+    public ResponseEntity<?> updateUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
         user.setNickname(nickname);
         try {
             userJDBCTemplate.getUserByNickname(nickname);

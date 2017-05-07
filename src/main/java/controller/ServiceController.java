@@ -1,12 +1,7 @@
 package controller;
 
-import models.forum.ForumJDBCTemplate;
-import models.post.PostJDBCTemplate;
 import models.status.StatusJDBCTemplate;
-import models.thread.ThreadJDBCTemplate;
-import models.user.UserJDBCTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,6 +28,11 @@ public class ServiceController {
     @RequestMapping(value = "/service/clear", method = RequestMethod.GET)
     public ResponseEntity<?> clear() throws IOException {
         statusJDBCTemplate.dropTable();
-        return new ResponseEntity<Object>(null, HttpStatus.OK);
+        return ResponseEntity.ok(null);
+    }
+
+    @RequestMapping(value = "/service/status", method = RequestMethod.GET)
+    public ResponseEntity<?> status() throws IOException {
+        return ResponseEntity.ok(statusJDBCTemplate.getStatus());
     }
 }

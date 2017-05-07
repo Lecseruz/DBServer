@@ -1,9 +1,10 @@
 package models.post;
 
+import config.TimestampHelper;
 /**
  * Created by magomed on 19.03.17.
  */
-public class Post {
+public class Post implements Comparable<Post> {
     private int id;
     private int parent;
     private String author;
@@ -12,6 +13,20 @@ public class Post {
     private String forum;
     private int thread;
     private String created;
+
+    public Post(){
+
+    }
+    public Post(int id, int parent, String author, String message, boolean isEdited, String forum, int thread, String created) {
+        this.id = id;
+        this.parent = parent;
+        this.author = author;
+        this.message = message;
+        this.isEdited = isEdited;
+        this.forum = forum;
+        this.thread = thread;
+        this.created = created;
+    }
 
     public int getId() {
         return id;
@@ -75,5 +90,16 @@ public class Post {
 
     public void setCreated(String created) {
         this.created = created;
+    }
+
+    @Override
+    public int compareTo(Post o) {
+        if (TimestampHelper.toTimestamp(created).getTime() == TimestampHelper.toTimestamp(o.created).getTime()){
+            return 0;
+        } else if (TimestampHelper.toTimestamp(created).getTime() == TimestampHelper.toTimestamp(o.created).getTime()){
+            return 1;
+        } else {
+            return -1;
+        }
     }
 }
