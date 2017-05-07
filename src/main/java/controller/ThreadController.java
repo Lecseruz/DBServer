@@ -56,10 +56,6 @@ public class ThreadController {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
         postJDBCTemplate.createPosts(posts);
-        for (Post post : posts) {
-            post.setId(1);
-            System.out.println(post.getParent());
-        }
         return ResponseEntity.status(HttpStatus.CREATED).body(posts);
     }
 

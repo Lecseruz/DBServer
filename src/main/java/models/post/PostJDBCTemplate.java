@@ -56,14 +56,15 @@ public class PostJDBCTemplate {
     }
 
     public void createPosts(List<Post> posts) {
-        String SQL = "INSERT INTO post (parent_id, author, message, isEdited, forum, thread, created) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String SQL = "INSERT INTO post (parent_id, author, message, isEdited, forum, thread, created) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
         String subQuery =
                 "UPDATE forum SET posts = posts + 1 " +
                         "WHERE slug = ? ;";
 
         for (Post post : posts) {
-            jdbcTemplate.update(SQL, post.getParent(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), TimestampHelper.toTimestamp(post.getCreated()));
+            int id = jdbcTemplate.queryForObject(SQL, Integer.class, post.getParent(), post.getAuthor(), post.getMessage(), post.getIsEdited(), post.getForum(), post.getThread(), TimestampHelper.toTimestamp(post.getCreated()));
             jdbcTemplate.update(subQuery, post.getForum());
+            post.setId(id);
         }
         LOGGER.debug("create posts with user ");
     }
@@ -127,15 +128,9 @@ public class PostJDBCTemplate {
 
         if (sort.toLowerCase().equals("flat")) {
             page = flatSort(id, limit, Integer.parseInt(marker), desc);
-            for (Post post : page) {
-                post.setId(1);
-            }
         }
         if (sort.toLowerCase().equals("tree")) {
             page = treeSort(id, limit, Integer.parseInt(marker), desc);
-            for (Post post : page) {
-                post.setId(1);
-            }
         }
 //        if(sort.toLowerCase().equals("parent_tree")){
 //            page = parentTreeSort(id, limit, Integer.parseInt(marker), desc);
@@ -143,8 +138,21 @@ public class PostJDBCTemplate {
         return page;
     }
 
+
+    public Post getPostById(int id){
+        final String SQL = "SELECT * FROM post WHERE id = ?";
+        Post post = jdbcTemplate.queryForObject(SQL, new PostMapper(), id);
+        LOGGER.debug("get post by id success");
+        return post;
+    }
+
+    public void updatePost(String message, int id){
+        String SQL = "UPDATE post SET message = ? WHERE id = ?";
+        jdbcTemplate.update(SQL, message, id);
+        LOGGER.debug("uodate post success");
+    }
     public void delete() {
-        String SQL = "DELETE FROM post";
+        final String SQL = "DELETE FROM post";
         jdbcTemplate.update(SQL);
         System.out.println("Deleted Record");
     }
