@@ -129,7 +129,7 @@ public class ThreadController {
     @RequestMapping(path = "/{slug_or_id}/posts", method = RequestMethod.GET)
     public ResponseEntity postsThread(@PathVariable(name = "slug_or_id") String slug,
                                       @RequestParam(name = "limit", required = false) Integer limit,
-                                      @RequestParam(name = "marker", required = false) String marker,
+                                      @RequestParam(name = "marker", required = false, defaultValue = "0") String marker,
                                       @RequestParam(name = "sort", required = false) String sort,
                                       @RequestParam(name = "desc", required = false) Boolean desc) {
         Thread thread;
@@ -144,9 +144,6 @@ public class ThreadController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (marker == null) {
-            marker = "0";
-        }
         if (sort == null) {
             sort = "flat";
         }

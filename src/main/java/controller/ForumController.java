@@ -40,7 +40,7 @@ public class ForumController {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
         try {
-            forumJDBCTemplate.create(forum.getTitle(), forum.getUser(), forum.getSlug(), forum.getPosts(), forum.getThread());
+            forumJDBCTemplate.create(forum.getTitle(), forum.getUser(), forum.getSlug(), forum.getPosts(), forum.getThreads());
             final User user = userJDBCTemplate.getUserByNickname(forum.getUser());
             forum.setUser(user.getNickname());
             return new ResponseEntity<Forum>(forum, HttpStatus.CREATED);

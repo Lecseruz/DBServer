@@ -1,14 +1,19 @@
 package models.thread;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Created by magomed on 07.05.17.
  */
 public class ThreadUpdate {
-    private String title;
+    @JsonProperty
     private String message;
+    @JsonProperty
+    private String title;
 
-
-    public ThreadUpdate(String title, String message) {
+    @JsonCreator
+    public ThreadUpdate(@JsonProperty("message") String message, @JsonProperty("title") String title) {
         this.title = title;
         this.message = message;
     }

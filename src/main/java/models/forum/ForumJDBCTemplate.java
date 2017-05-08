@@ -82,6 +82,7 @@ public class ForumJDBCTemplate {
             SQL +=" LIMIT ?";
         }
         List<User> users = jdbcTemplate.query(SQL, new UserMapper(), slug, limit);
+        LOGGER.debug("getUsers success");
         return users;
     }
 

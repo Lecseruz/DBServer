@@ -8,10 +8,10 @@ public class Forum {
     private String user;
     private String slug;
     private int posts;
-    private int thread;
+    private int threads;
 
-    public int getThread() {
-        return thread;
+    public int getThreads() {
+        return threads;
     }
 
     public String getTitle() {
@@ -43,13 +43,13 @@ public class Forum {
     }
 
     public void print(){
-        System.out.print(title + user + slug + posts + thread);
+        System.out.print(title + user + slug + posts + threads);
     }
     public void setPosts(int posts) {
         this.posts = posts;
     }
 
-    public void setThread(int thread) {
-        this.thread = thread;
+    public void setThreads(int thread) {
+        this.threads = thread;
     }
 }

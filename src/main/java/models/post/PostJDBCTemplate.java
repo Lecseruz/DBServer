@@ -1,13 +1,17 @@
 package models.post;
 
 import config.TimestampHelper;
+import javafx.geometry.Pos;
 import models.thread.ThreadJDBCTemplate;
 import org.apache.log4j.Logger;
+import org.omg.PortableServer.POA;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +20,7 @@ import java.util.Map;
 public class PostJDBCTemplate {
 
     private final JdbcTemplate jdbcTemplate;
-
+    private int marker = 0;// TODO: гавнокод
     private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
 
     @Autowired
@@ -66,6 +70,7 @@ public class PostJDBCTemplate {
             jdbcTemplate.update(subQuery, post.getForum());
             post.setId(id);
         }
+        marker = 0;// TODO: гавнокод
         LOGGER.debug("create posts with user ");
     }
 
@@ -75,6 +80,7 @@ public class PostJDBCTemplate {
         String sqlForum =
                 "UPDATE forum SET posts = posts + 1 " +
                         "WHERE slug = ? ;";
+        marker = 0;// TODO: гавнокод
         jdbcTemplate.update(sqlForum, post.getForum());
         LOGGER.debug("created" + post.getId() + " with user ");
     }
@@ -86,7 +92,7 @@ public class PostJDBCTemplate {
         return count;
     }
 
-    public List<Post> flatSort(int id, int limit, int marker, boolean desc) {
+    public List<Post> flatSort(int id, int limit, int offset, boolean desc) {
         String SQL = "SELECT * FROM post WHERE thread = ? ";
 
         if (desc) {
@@ -97,20 +103,21 @@ public class PostJDBCTemplate {
         SQL += " LIMIT ? ";
         SQL += " OFFSET ? ";
 
-        List<Post> posts = jdbcTemplate.query(SQL, new PostMapper(), id, limit, marker);
+        List<Post> posts = jdbcTemplate.query(SQL, new PostMapper(), id, limit, offset);
         LOGGER.debug("get posts success");
+        marker += posts.size() ;// TODO: гавнокод
         return posts;
     }
 
-    public List<Post> treeSort(int id, int limit, int marker, boolean desc) {
+    public List<Post> treeSort(int id, int limit, int offset, boolean desc) {
         String sql =
                 "WITH RECURSIVE recursepost (id, parent_id, path, author, message, isEdited, forum, thread, created) AS ( " +
-                "SELECT id, parent_id, array[id], author, message, isEdited, forum, thread, created FROM post WHERE parent_id = 0 " +
-                "UNION ALL " +
-                "SELECT p.id, p.parent_id, array_append(path, p.id), p.author, p.message, p.isEdited, p.forum, p.thread, p.created FROM post AS p " +
-                "JOIN recursepost rp ON rp.id = p.parent_id ) " +
-                "SELECT id, parent_id, path, author, message, isEdited, forum, thread, created FROM recursepost WHERE thread = ? ";
-        if(desc) {
+                        "SELECT id, parent_id, array[id], author, message, isEdited, forum, thread, created FROM post WHERE parent_id = 0 " +
+                        "UNION ALL " +
+                        "SELECT p.id, p.parent_id, array_append(path, p.id), p.author, p.message, p.isEdited, p.forum, p.thread, p.created FROM post AS p " +
+                        "JOIN recursepost rp ON rp.id = p.parent_id ) " +
+                        "SELECT id, parent_id, path, author, message, isEdited, forum, thread, created FROM recursepost WHERE thread = ? ";
+        if (desc) {
             sql += "ORDER BY path DESC ";
         } else
             sql += "ORDER BY path ";
@@ -118,39 +125,77 @@ public class PostJDBCTemplate {
         sql += "LIMIT ? ";
         sql += "OFFSET ? ;";
         List<Map<String, Object>> rows;
-        final List<Post> posts = jdbcTemplate.query(sql, new PostMapper(), id, limit, marker);
+        final List<Post> posts = jdbcTemplate.query(sql, new PostMapper(), id, limit, offset);
+        marker += posts.size() ;// TODO: гавнокод
         LOGGER.debug("get posts success");
         return posts;
     }
 
-    public List<Post> getByThread(int id, Integer limit, String marker, String sort, Boolean desc) {
-        List<Post> page = null;
+    public List<Post> parentTreeSort(int id, Integer limit, Integer offset, Boolean desc) {
+        String SQL =
+                "WITH RECURSIVE recursepost (id, parent_id, path, author, message, isEdited, forum, thread, created) AS ( " +
+                        "SELECT id, parent_id, array[id], author, message, isEdited, forum, thread, created FROM post WHERE id = ? " +
+                        "UNION ALL " +
+                        "SELECT p.id, p.parent_id, array_append(path, p.id), p.author, p.message, p.isEdited, p.forum, p.thread, p.created FROM post AS p " +
+                        "JOIN recursepost rp ON rp.id = p.parent_id ) " +
+                        "SELECT id, parent_id, path, author, message, isEdited, forum, thread, created FROM recursepost WHERE thread = ? ";
 
+        String parentSQL = "SELECT * FROM post WHERE parent_id = 0 AND thread = ? ";
+        if (desc) {
+            SQL += "ORDER BY path DESC ;";
+            parentSQL += "ORDER BY id DESC ";
+        } else {
+            SQL += "ORDER BY path ;";
+            parentSQL += "ORDER BY id ";
+        }
+        parentSQL += " LIMIT ? ";
+        parentSQL += " OFFSET ? ;";
+        List<Post> posts = new ArrayList<Post>();
+        List<Post> parentPosts = jdbcTemplate.query(parentSQL, new PostMapper(), id, limit, offset);
+        for (Post posts1 : parentPosts) {
+            List<Post> rows = jdbcTemplate.query(SQL, new PostMapper(), posts1.getId(), id);
+            posts.addAll(rows);
+        }
+        marker += parentPosts.size() ;// TODO: гавнокод
+        LOGGER.debug("parentTree success");
+        return posts;
+    }
+
+    public List<Post> getByThread(int id, Integer limit, String offset, String sort, Boolean desc) {
+        List<Post> page = null;
+        int a; // TODO : идиотизм
+        if (!offset.equals("0")){
+            a = marker;
+        } else{
+            a = 0;
+            marker = 0;
+        }
         if (sort.toLowerCase().equals("flat")) {
-            page = flatSort(id, limit, Integer.parseInt(marker), desc);
+            page = flatSort(id, limit, a, desc);
         }
         if (sort.toLowerCase().equals("tree")) {
-            page = treeSort(id, limit, Integer.parseInt(marker), desc);
+            page = treeSort(id, limit, a, desc);
         }
-//        if(sort.toLowerCase().equals("parent_tree")){
-//            page = parentTreeSort(id, limit, Integer.parseInt(marker), desc);
-//        }
+        if (sort.toLowerCase().equals("parent_tree")) {
+            page = parentTreeSort(id, limit, a, desc);
+        }
         return page;
     }
 
 
-    public Post getPostById(int id){
+    public Post getPostById(int id) {
         final String SQL = "SELECT * FROM post WHERE id = ?";
         Post post = jdbcTemplate.queryForObject(SQL, new PostMapper(), id);
         LOGGER.debug("get post by id success");
         return post;
     }
 
-    public void updatePost(String message, int id){
+    public void updatePost(String message, int id) {
         String SQL = "UPDATE post SET message = ? WHERE id = ?";
         jdbcTemplate.update(SQL, message, id);
         LOGGER.debug("uodate post success");
     }
+
     public void delete() {
         final String SQL = "DELETE FROM post";
         jdbcTemplate.update(SQL);
