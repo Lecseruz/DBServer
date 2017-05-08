@@ -69,23 +69,6 @@ public class ForumJDBCTemplate {
         return forum;
     }
 
-    public List<User> getUsers(String slug, boolean desk, int limit, int id) {
-        String SQL = "SELECT m.* FROM forum AS f JOIN m_user AS m ON f.admin = m.nickname " +
-                    " WHERE f.threads > 0 OR f.posts > 0";
-        if (id != 0){
-            SQL += "OR m.id != " + id;
-        }
-        if (desk){
-            SQL += " ORDER BY m.nickname desk ";
-        }
-        if (limit > 0){
-            SQL +=" LIMIT ?";
-        }
-        List<User> users = jdbcTemplate.query(SQL, new UserMapper(), slug, limit);
-        LOGGER.debug("getUsers success");
-        return users;
-    }
-
     public Forum getForumByNicknameAndTitle(String admin, String title) {
         String SQL = "SELECT * FROM forum WHERE LOWER(admin) = LOWER(?) AND LOWER(title) = LOWER(?)";
         Forum forum = jdbcTemplate.queryForObject(SQL, new ForumMapper(), admin, title);

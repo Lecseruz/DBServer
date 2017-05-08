@@ -92,14 +92,12 @@ public class ForumController {
     }
 
     @RequestMapping(value = "/{slug}/users", method = RequestMethod.GET)
-    public ResponseEntity<?> getUsers(@PathVariable(value = "slug") String slug, @RequestParam(value = "desc", required = false, defaultValue = "false") boolean desc, @RequestParam(value = "limit", required = false, defaultValue = "0") int limit, @RequestParam(value = "since", required = false, defaultValue = "") String since) throws IOException {
+    public ResponseEntity<?> getUsers(@PathVariable(value = "slug") String slug, @RequestParam(value = "desc", required = false, defaultValue = "false") boolean desc, @RequestParam(value = "limit", required = false, defaultValue = "0") int limit, @RequestParam(value = "since", required = false) String since) throws IOException {
         try {
             forumJDBCTemplate.getForumBySlug(slug);
         } catch (EmptyResultDataAccessException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        final int a = Integer.parseInt(since);
-        final List<User> users = forumJDBCTemplate.getUsers(slug, desc, limit, a);
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userJDBCTemplate.getByForum(slug, limit, since, desc));
     }
 }

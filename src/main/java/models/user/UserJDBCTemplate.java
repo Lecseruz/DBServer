@@ -3,6 +3,7 @@ package models.user;
 
 import java.util.List;
 
+import models.post.Post;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class UserJDBCTemplate implements UserDAO {
+public class UserJDBCTemplate {
 
     private final JdbcTemplate jdbcTemplate;
     private static final Logger LOGGER = Logger.getLogger(UserJDBCTemplate.class);
@@ -23,7 +24,6 @@ public class UserJDBCTemplate implements UserDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
     public void createTable() {
         String query =
                 "CREATE EXTENSION IF NOT EXISTS citext; " +
@@ -37,7 +37,6 @@ public class UserJDBCTemplate implements UserDAO {
         jdbcTemplate.execute(query);
     }
 
-    @Override
     public void dropTable() {
         String query = "DROP TABLE IF EXISTS m_user";
 
@@ -46,14 +45,12 @@ public class UserJDBCTemplate implements UserDAO {
 
     }
 
-    @Override
     public void create(String nickname, String fullname, String abbout, String email) {
         String SQL = "INSERT INTO m_user(nickname, fullname, abbout, email) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(SQL, nickname, fullname, abbout, email);
         LOGGER.debug("insert success");
     }
 
-    @Override
     public User getUserByNickname(String nickname) {
         String SQL = "SELECT * FROM m_user WHERE LOWER(nickname) = LOWER(?)";
         User users = jdbcTemplate.queryForObject(SQL, new UserMapper(), nickname);
@@ -61,7 +58,6 @@ public class UserJDBCTemplate implements UserDAO {
         return users;
     }
 
-    @Override
     public List<User> getUserByNicknameAndEmail(String nickname, String email) {
         final String SQL = "SELECT * FROM m_user WHERE LOWER(nickname) = LOWER(?) OR LOWER(email) = LOWER(?)";
         List<User> user = jdbcTemplate.query(SQL, new UserMapper(), nickname, email);
@@ -73,7 +69,35 @@ public class UserJDBCTemplate implements UserDAO {
         }
     }
 
-    @Override
+    public List<User> getByForum(String slug, Integer limit, String since, boolean desc) {
+        String SQL =
+                "SELECT * FROM m_user WHERE nickname IN (" +
+                        "SELECT author FROM post WHERE forum = ? UNION " +
+                        "SELECT author FROM thread WHERE forum = ?) ";
+
+        if (since != null) {
+            if (desc) {
+                SQL += "AND LOWER(nickname COLLATE \"ucs_basic\") < LOWER(? COLLATE \"ucs_basic\") ";
+            } else
+                SQL += "AND LOWER(nickname COLLATE \"ucs_basic\") > LOWER(? COLLATE \"ucs_basic\") ";
+        }
+
+        if (desc) {
+            SQL += "ORDER BY LOWER(nickname COLLATE \"ucs_basic\") DESC ";
+        } else
+            SQL += "ORDER BY LOWER(nickname COLLATE \"ucs_basic\") ";
+
+        SQL += "LIMIT ? ;";
+        List<User> users = null;
+        if (since != null)
+            users = jdbcTemplate.query(SQL, new UserMapper(), slug, slug, since, limit);
+        else
+            users = jdbcTemplate.query(SQL, new UserMapper(), slug, slug, limit);
+        LOGGER.debug("getUsers success");
+        return users;
+    }
+
+
     public User getUserByEmail(String email) {
         String SQL = "SELECT * FROM M_user WHERE email = ?";
         User users = jdbcTemplate.queryForObject(SQL, new Object[]{email}, new UserMapper());
@@ -81,35 +105,30 @@ public class UserJDBCTemplate implements UserDAO {
         return users;
     }
 
-    @Override
     public void updateFullname(String fullname, String nickname) {
         String SQL = "UPDATE m_user SET fullname = ? WHERE LOWER(nickname) = LOWER(?)";
         jdbcTemplate.update(SQL, fullname, nickname);
         LOGGER.debug("Updated fullname");
     }
 
-    @Override
     public void updateAbbout(String about, String nickname) {
         String SQL = "UPDATE m_user SET abbout = ? WHERE LOWER(nickname) = LOWER(?)";
         jdbcTemplate.update(SQL, about, nickname);
         LOGGER.debug("Updated about");
     }
 
-    @Override
     public void updateEmail(String email, String nickname) {
         String SQL = "UPDATE m_user SET email = ? WHERE LOWER(nickname) = LOWER(?)";
         jdbcTemplate.update(SQL, email, nickname);
         LOGGER.debug("Updated email");
     }
 
-    @Override
     public void delete() {
         String SQL = "DELETE FROM m_user";
         jdbcTemplate.update(SQL);
         LOGGER.debug("Deleted success");
     }
 
-    @Override
     public int getCount() {
         String SQL = "SELECT COUNT(*) FROM M_user";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
@@ -117,7 +136,6 @@ public class UserJDBCTemplate implements UserDAO {
         return count;
     }
 
-    @Override
     public List<User> listUsers() {
         String SQL = "SELECT * FROM M_User";
         List<User> users = jdbcTemplate.query(SQL, new UserMapper());
