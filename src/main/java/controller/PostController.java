@@ -53,6 +53,9 @@ public class PostController {
         try {
             final ResponseInfoPost responseInfoPost = new ResponseInfoPost();
             responseInfoPost.setPost(postJDBCTemplate.getPostById(id));
+            if (responseInfoPost.getPost() == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);// TODO : bad
+            }
             if (related != null) {
                 if (related.contains("user")) {
                     responseInfoPost.setAuthor(userJDBCTemplate.getUserByNickname(responseInfoPost.getPost().getAuthor()));

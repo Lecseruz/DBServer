@@ -25,9 +25,10 @@ public class ServiceController {
         statusJDBCTemplate.createTable();
     }
 
-    @RequestMapping(value = "/clear", method = RequestMethod.GET)
+    @RequestMapping(value = "/clear", method = RequestMethod.POST)
     public ResponseEntity<?> clear() throws IOException {
         statusJDBCTemplate.dropTable();
+        statusJDBCTemplate.createTable();
         return ResponseEntity.ok(null);
     }
 
