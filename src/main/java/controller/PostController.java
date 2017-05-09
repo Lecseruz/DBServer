@@ -9,7 +9,6 @@ import models.thread.ThreadJDBCTemplate;
 import models.user.UserJDBCTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,16 +39,16 @@ public class PostController {
         try {
             final Post post = postJDBCTemplate.getPostById(id);
             if (post == null) {
-                return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND); // TODO : bad
+                return ResponseEntity.notFound().build();// TODO : bad
             }
             if (!post.getMessage().equals(postUpdate.getMessage())) {
-                Post newPost = postJDBCTemplate.updatePost(postUpdate.getMessage(), post.getId());
+                final Post newPost = postJDBCTemplate.updatePost(postUpdate.getMessage(), post.getId());
                 return ResponseEntity.ok(newPost);
             } else{
                 return ResponseEntity.ok(post);
             }
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -58,8 +57,8 @@ public class PostController {
         try {
             final ResponseInfoPost responseInfoPost = new ResponseInfoPost();
             responseInfoPost.setPost(postJDBCTemplate.getPostById(id));
-            if (responseInfoPost.getPost() == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);// TODO : bad
+            if (responseInfoPost.getPost() == null){
+                return ResponseEntity.notFound().build();// TODO : bad
             }
             if (related != null) {
                 if (related.contains("user")) {
@@ -74,7 +73,7 @@ public class PostController {
             }
             return ResponseEntity.ok(responseInfoPost);
         } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.notFound().build();
         }
     }
 }

@@ -37,13 +37,13 @@ public class ForumController {
         try {
             userJDBCTemplate.getUserByNickname(forum.getUser());
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         try {
             forumJDBCTemplate.create(forum.getTitle(), forum.getUser(), forum.getSlug(), forum.getPosts(), forum.getThreads());
             final User user = userJDBCTemplate.getUserByNickname(forum.getUser());
             forum.setUser(user.getNickname());
-            return new ResponseEntity<Forum>(forum, HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body(forum);
         } catch (DuplicateKeyException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(forumJDBCTemplate.getForumBySlug(forum.getSlug()));
         }
@@ -55,9 +55,9 @@ public class ForumController {
             final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
             final User user = userJDBCTemplate.getUserByNickname(forum.getUser());
             forum.setUser(user.getNickname());
-            return new ResponseEntity<Forum>(forum, HttpStatus.OK);
+            return ResponseEntity.ok(forum);
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -68,15 +68,15 @@ public class ForumController {
             final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
             thread.setForum(forum.getSlug());
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         } catch (NullPointerException ignored) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         try {
             threadJDBCTemplate.create(thread);
             return ResponseEntity.status(HttpStatus.CREATED).body(thread);
         } catch (DuplicateKeyException e) {
-            return new ResponseEntity<Thread>(threadJDBCTemplate.getThreadBySlug(thread.getSlug()), HttpStatus.CONFLICT);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(threadJDBCTemplate.getThreadBySlug(thread.getSlug()));
         }
     }
 
@@ -85,7 +85,7 @@ public class ForumController {
         try {
             forumJDBCTemplate.getForumBySlug(slug);
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         final List<Thread> threads = threadJDBCTemplate.getThreads(slug, desc, limit, created);
         return ResponseEntity.ok(threads);
@@ -96,7 +96,7 @@ public class ForumController {
         try {
             forumJDBCTemplate.getForumBySlug(slug);
         } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(userJDBCTemplate.getByForum(slug, limit, since, desc));
     }

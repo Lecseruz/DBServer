@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 
-
 /**
  *  Здесь важно понять порядок, в котором все происходит.
  *  Чтобы увидеть работу Spring'а, можно повысить детализацию логов: добавить в файл resources/application.properties строку

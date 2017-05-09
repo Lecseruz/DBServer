@@ -1,8 +1,5 @@
 package controller;
 
-import java.io.IOException;
-import java.util.List;
-
 import models.status.StatusJDBCTemplate;
 import models.user.User;
 import models.user.UserJDBCTemplate;
@@ -12,6 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 
 @RestController
@@ -30,13 +29,13 @@ public class UserController {
     public ResponseEntity<?> createUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
         user.setNickname(nickname);
         if (user.isEmpty()) {
-            return new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
         }
         try {
             userJDBCTemplate.create(nickname, user.getFullname(), user.getAbout(), user.getEmail());
-            return new ResponseEntity<User>(user, HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } catch (DuplicateKeyException e) {
-            return new ResponseEntity<List<User>>(userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail()), HttpStatus.CONFLICT);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail()));
         }
     }
 
@@ -44,9 +43,9 @@ public class UserController {
     public ResponseEntity<?> getUser(@PathVariable(value = "nickname") String nickname) throws IOException {
         try {
             final User user = userJDBCTemplate.getUserByNickname(nickname);
-            return new ResponseEntity<User>(user, HttpStatus.OK);
+            return ResponseEntity.ok(user);
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -65,12 +64,12 @@ public class UserController {
                 userJDBCTemplate.updateEmail(user.getEmail(), nickname);
             }
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         catch (DuplicateKeyException d){
-            return new ResponseEntity<Object>(null, HttpStatus.CONFLICT);
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        return new ResponseEntity<User>(userJDBCTemplate.getUserByNickname(nickname), HttpStatus.OK);
+        return ResponseEntity.ok(userJDBCTemplate.getUserByNickname(nickname));
     }
 }

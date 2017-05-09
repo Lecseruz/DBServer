@@ -3,12 +3,11 @@ package controller;
 import models.ResponseObject.ResponsePosts;
 import models.post.Post;
 import models.post.PostJDBCTemplate;
-import models.status.StatusJDBCTemplate;
 import models.thread.Thread;
 import models.thread.ThreadJDBCTemplate;
 import models.thread.ThreadUpdate;
-import models.voice.Voice;
 import models.user.UserJDBCTemplate;
+import models.voice.Voice;
 import models.voice.VoiceJDBCTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -42,7 +41,7 @@ public class ThreadController {
     @RequestMapping(value = "/{slug_or_id}/create", method = RequestMethod.POST)
     public ResponseEntity<?> createThread(@PathVariable(value = "slug_or_id") String slug, @RequestBody List<Post> posts) throws IOException {
         try {
-            Thread thread = null;
+            Thread thread;
             try {
                 final int a = Integer.parseInt(slug);
                 thread = threadJDBCTemplate.getThreadById(a);
@@ -55,16 +54,16 @@ public class ThreadController {
                 post.setThread(thread.getId());
                 post.setCreated(thread.getCreated());
                 if (post.getParent() != 0) {
-                    Post parent = postJDBCTemplate.getPostById(post.getParent());
+                    final Post parent = postJDBCTemplate.getPostById(post.getParent());
                     post.setForum(thread.getForum());
                     post.setThread(thread.getId());
                     if (parent == null || thread.getId() != parent.getThread()) {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+                        return ResponseEntity.status(HttpStatus.CONFLICT).build();
                     }
                 }
             }
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         postJDBCTemplate.createPosts(posts);
         return ResponseEntity.status(HttpStatus.CREATED).body(posts);
@@ -90,7 +89,7 @@ public class ThreadController {
             }
             return ResponseEntity.status(HttpStatus.OK).body(thread);
         } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.notFound().build();
         } catch (DuplicateKeyException e) {
             if (!(voice.getVoice() == voiceJDBCTemplate.getVoiceWithNickname(voice.getNickname()).getVoice())) {
                 if (voice.getVoice() == 1) {
@@ -103,7 +102,7 @@ public class ThreadController {
                     voiceJDBCTemplate.updateVoice(voice.getVoice(), voice.getNickname());
                 }
             }
-            return ResponseEntity.status(HttpStatus.OK).body(thread);
+            return ResponseEntity.ok(thread);
         }
     }
 
@@ -112,14 +111,14 @@ public class ThreadController {
         try {
             Thread thread;
             try {
-                final int a = Integer.parseInt(slug);
-                thread = threadJDBCTemplate.getThreadById(a);
+                final int id = Integer.parseInt(slug);
+                thread = threadJDBCTemplate.getThreadById(id);
             } catch (NumberFormatException ignored) {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
             }
             return ResponseEntity.ok(thread);
         } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -133,10 +132,10 @@ public class ThreadController {
             } catch (NumberFormatException ignored) {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
             }
-            Thread newThread = threadJDBCTemplate.updateThread(threadUpdate, thread.getSlug());
+            final Thread newThread = threadJDBCTemplate.updateThread(threadUpdate, thread.getSlug());
             return ResponseEntity.ok(newThread);
         } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -155,7 +154,7 @@ public class ThreadController {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
             }
         } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.notFound().build();
         }
 
         if (sort == null) {
@@ -169,6 +168,6 @@ public class ThreadController {
 
         responsePosts.setMarker("some marker");
         responsePosts.setPosts(posts);
-        return ResponseEntity.status(HttpStatus.OK).body(responsePosts);
+        return ResponseEntity.ok(responsePosts);
     }
 }
