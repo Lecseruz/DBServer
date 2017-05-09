@@ -66,10 +66,23 @@ public class ThreadJDBCTemplate {
         thread.setId(id);
     }
 
-    public void updateThread(ThreadUpdate threadUpdate, String slug){
-        String SQL = "UPDATE thread SET title = ?, message = ? WHERE lower(slug) = lower(?)";
-        jdbcTemplate.update(SQL, threadUpdate.getTitle(), threadUpdate.getMessage(), slug);
+    public Thread updateThread(ThreadUpdate threadUpdate, String slug){
+        if (threadUpdate.getMessage() != null || threadUpdate.getTitle() != null) {
+            String SQL = "UPDATE thread SET ";
+            if (threadUpdate.getTitle() != null){
+                SQL += "title = '" + threadUpdate.getTitle() + "' ";
+            }
+            if (threadUpdate.getMessage() != null){
+                if (threadUpdate.getTitle() != null){
+                    SQL+= ", ";
+                }
+                SQL += "message = '" + threadUpdate.getMessage() + "' ";
+            }
+            SQL += "WHERE lower(slug) = lower(?)";
+            jdbcTemplate.update(SQL, slug);
+        }
         LOGGER.debug("updateThread success");
+        return getThreadBySlug(slug);
     }
 
     public Thread getThreadById(int id) {

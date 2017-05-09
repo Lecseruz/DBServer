@@ -54,7 +54,7 @@ public class ThreadController {
                 post.setForum(thread.getForum());
                 post.setThread(thread.getId());
                 post.setCreated(thread.getCreated());
-                if(post.getParent() != 0) {
+                if (post.getParent() != 0) {
                     Post parent = postJDBCTemplate.getPostById(post.getParent());
                     post.setForum(thread.getForum());
                     post.setThread(thread.getId());
@@ -125,17 +125,19 @@ public class ThreadController {
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.POST)
     public ResponseEntity<?> updateThreads(@PathVariable(value = "slug_or_id") String slug, @RequestBody ThreadUpdate threadUpdate) throws IOException {
-        Thread thread;
         try {
-            final int a = Integer.parseInt(slug);
-            thread = threadJDBCTemplate.getThreadById(a);
-        } catch (NumberFormatException ignored) {
-            thread = threadJDBCTemplate.getThreadBySlug(slug);
+            Thread thread;
+            try {
+                final int a = Integer.parseInt(slug);
+                thread = threadJDBCTemplate.getThreadById(a);
+            } catch (NumberFormatException ignored) {
+                thread = threadJDBCTemplate.getThreadBySlug(slug);
+            }
+            Thread newThread = threadJDBCTemplate.updateThread(threadUpdate, thread.getSlug());
+            return ResponseEntity.ok(newThread);
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        threadJDBCTemplate.updateThread(threadUpdate, thread.getSlug());
-        thread.setTitle(threadUpdate.getTitle());
-        thread.setMessage(threadUpdate.getMessage());
-        return ResponseEntity.ok(thread);
     }
 
     @RequestMapping(path = "/{slug_or_id}/posts", method = RequestMethod.GET)
