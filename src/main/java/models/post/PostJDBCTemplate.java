@@ -204,12 +204,14 @@ public class PostJDBCTemplate {
             return null;
         }
     }
-    public void updatePost(String message, int id) {
-        String SQL = "UPDATE post SET message = ?, isedited = " + true + " WHERE id = ?";
-        jdbcTemplate.update(SQL, message, id);
-        LOGGER.debug("uodate post success");
+    public Post updatePost(String message, int id) {
+        if (message != null) {
+            String SQL = "UPDATE post SET message = ?, isedited = " + true + " WHERE id = ?";
+            jdbcTemplate.update(SQL, message, id);
+            LOGGER.debug("uodate post success");
+        }
+        return getPostById(id);
     }
-
     public void delete() {
         final String SQL = "DELETE FROM post";
         jdbcTemplate.update(SQL);

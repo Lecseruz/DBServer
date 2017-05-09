@@ -39,10 +39,15 @@ public class PostController {
     public ResponseEntity<?> updatePost(@PathVariable(value = "id") int id, @RequestBody PostUpdate postUpdate) {
         try {
             final Post post = postJDBCTemplate.getPostById(id);
-            postJDBCTemplate.updatePost(postUpdate.getMessage(), post.getId());
-            post.setMessage(postUpdate.getMessage());
-            post.setIsEdited(true);
-            return ResponseEntity.ok(post);
+            if (post == null) {
+                return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND); // TODO : bad
+            }
+            if (!post.getMessage().equals(postUpdate.getMessage())) {
+                Post newPost = postJDBCTemplate.updatePost(postUpdate.getMessage(), post.getId());
+                return ResponseEntity.ok(newPost);
+            } else{
+                return ResponseEntity.ok(post);
+            }
         } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
         }
@@ -53,7 +58,7 @@ public class PostController {
         try {
             final ResponseInfoPost responseInfoPost = new ResponseInfoPost();
             responseInfoPost.setPost(postJDBCTemplate.getPostById(id));
-            if (responseInfoPost.getPost() == null){
+            if (responseInfoPost.getPost() == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);// TODO : bad
             }
             if (related != null) {
