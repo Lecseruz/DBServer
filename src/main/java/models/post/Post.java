@@ -1,22 +1,32 @@
 package models.post;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import config.TimestampHelper;
 /**
  * Created by magomed on 19.03.17.
  */
 public class Post implements Comparable<Post> {
+    @JsonProperty
     private int id;
+    @JsonProperty
     private int parent;
+    @JsonProperty
     private String author;
+    @JsonProperty
     private String message;
+    @JsonProperty
     private boolean isEdited;
+    @JsonProperty
     private String forum;
+    @JsonProperty
     private int thread;
+    @JsonProperty
     private String created;
 
     public Post(){
 
     }
+
     public Post(int id, int parent, String author, String message, boolean isEdited, String forum, int thread, String created) {
         this.id = id;
         this.parent = parent;
@@ -65,7 +75,7 @@ public class Post implements Comparable<Post> {
     }
 
     public void setIsEdited(boolean isEdited) {
-        isEdited = isEdited;
+        this.isEdited = isEdited;
     }
 
     public String getForum() {

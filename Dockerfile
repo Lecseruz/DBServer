@@ -11,7 +11,7 @@ RUN apt-get -y update
 ENV PGVER 9.5
 RUN apt-get install -y postgresql-$PGVER
 
-# Run the rest of the commands as the ``postgres`` user created by the ``postgres-$PGVER`` package when it was ``apt-get installed``
+# Run the rest of the commands as the ``postgres`` author created by the ``postgres-$PGVER`` package when it was ``apt-get installed``
 USER postgres
 
 # Create a PostgreSQL role named ``docker`` with ``docker`` as the password and
@@ -34,7 +34,7 @@ EXPOSE 5432
 # Add VOLUMEs to allow backup of config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-# Back to the root user
+# Back to the root author
 USER root
 
 ##

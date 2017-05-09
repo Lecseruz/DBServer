@@ -1,12 +1,9 @@
 package models.post;
 
 import config.TimestampHelper;
-import javafx.geometry.Pos;
 import models.thread.ThreadJDBCTemplate;
 import org.apache.log4j.Logger;
-import org.omg.PortableServer.POA;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -191,7 +188,7 @@ public class PostJDBCTemplate {
     }
 
     public void updatePost(String message, int id) {
-        String SQL = "UPDATE post SET message = ? WHERE id = ?";
+        String SQL = "UPDATE post SET message = ?, isedited = " + true + " WHERE id = ?";
         jdbcTemplate.update(SQL, message, id);
         LOGGER.debug("uodate post success");
     }

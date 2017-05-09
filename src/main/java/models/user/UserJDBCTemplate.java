@@ -72,14 +72,14 @@ public class UserJDBCTemplate {
     public List<User> getByForum(String slug, Integer limit, String since, boolean desc) {
         String SQL =
                 "SELECT * FROM m_user WHERE nickname IN (" +
-                        "SELECT author FROM post WHERE forum = ? UNION " +
-                        "SELECT author FROM thread WHERE forum = ?) ";
+                        "SELECT author FROM post WHERE forum = '" + slug + "' UNION " +
+                        "SELECT author FROM thread WHERE forum = '" + slug + "' ) "; // TODO : bad programmist
 
         if (since != null) {
             if (desc) {
-                SQL += "AND LOWER(nickname COLLATE \"ucs_basic\") < LOWER(? COLLATE \"ucs_basic\") ";
+                SQL += "AND LOWER(nickname COLLATE \"ucs_basic\") < LOWER('" + since + "' COLLATE \"ucs_basic\") ";
             } else
-                SQL += "AND LOWER(nickname COLLATE \"ucs_basic\") > LOWER(? COLLATE \"ucs_basic\") ";
+                SQL += "AND LOWER(nickname COLLATE \"ucs_basic\") > LOWER('" + since + "' COLLATE \"ucs_basic\") ";
         }
 
         if (desc) {
@@ -87,12 +87,10 @@ public class UserJDBCTemplate {
         } else
             SQL += "ORDER BY LOWER(nickname COLLATE \"ucs_basic\") ";
 
-        SQL += "LIMIT ? ;";
-        List<User> users = null;
-        if (since != null)
-            users = jdbcTemplate.query(SQL, new UserMapper(), slug, slug, since, limit);
-        else
-            users = jdbcTemplate.query(SQL, new UserMapper(), slug, slug, limit);
+        if (limit != 0) {
+            SQL += "LIMIT " + limit + " ;";
+        }
+        List<User> users = jdbcTemplate.query(SQL, new UserMapper());
         LOGGER.debug("getUsers success");
         return users;
     }
