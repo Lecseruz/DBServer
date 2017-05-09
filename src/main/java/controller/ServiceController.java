@@ -25,13 +25,13 @@ public class ServiceController {
         statusJDBCTemplate.createTable();
     }
 
-    @RequestMapping(value = "/service/clear", method = RequestMethod.GET)
+    @RequestMapping(value = "/clear", method = RequestMethod.GET)
     public ResponseEntity<?> clear() throws IOException {
         statusJDBCTemplate.dropTable();
         return ResponseEntity.ok(null);
     }
 
-    @RequestMapping(value = "/service/status", method = RequestMethod.GET)
+    @RequestMapping(value = "/status", method = RequestMethod.GET)
     public ResponseEntity<?> status() throws IOException {
         return ResponseEntity.ok(statusJDBCTemplate.getStatus());
     }

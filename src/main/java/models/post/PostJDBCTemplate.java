@@ -4,6 +4,7 @@ import config.TimestampHelper;
 import models.thread.ThreadJDBCTemplate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,7 +103,7 @@ public class PostJDBCTemplate {
 
         List<Post> posts = jdbcTemplate.query(SQL, new PostMapper(), id, limit, offset);
         LOGGER.debug("get posts success");
-        marker += posts.size() ;// TODO: гавнокод
+        marker += posts.size();// TODO: гавнокод
         return posts;
     }
 
@@ -123,7 +124,7 @@ public class PostJDBCTemplate {
         sql += "OFFSET ? ;";
         List<Map<String, Object>> rows;
         final List<Post> posts = jdbcTemplate.query(sql, new PostMapper(), id, limit, offset);
-        marker += posts.size() ;// TODO: гавнокод
+        marker += posts.size();// TODO: гавнокод
         LOGGER.debug("get posts success");
         return posts;
     }
@@ -153,7 +154,7 @@ public class PostJDBCTemplate {
             List<Post> rows = jdbcTemplate.query(SQL, new PostMapper(), posts1.getId(), id);
             posts.addAll(rows);
         }
-        marker += parentPosts.size() ;// TODO: гавнокод
+        marker += parentPosts.size();// TODO: гавнокод
         LOGGER.debug("parentTree success");
         return posts;
     }
@@ -161,9 +162,9 @@ public class PostJDBCTemplate {
     public List<Post> getByThread(int id, Integer limit, String offset, String sort, Boolean desc) {
         List<Post> page = null;
         int a; // TODO : идиотизм
-        if (!offset.equals("0")){
+        if (!offset.equals("0")) {
             a = marker;
-        } else{
+        } else {
             a = 0;
             marker = 0;
         }
@@ -182,11 +183,27 @@ public class PostJDBCTemplate {
 
     public Post getPostById(int id) {
         final String SQL = "SELECT * FROM post WHERE id = ?";
-        Post post = jdbcTemplate.queryForObject(SQL, new PostMapper(), id);
-        LOGGER.debug("get post by id success");
-        return post;
+        try {
+            Post post = jdbcTemplate.queryForObject(SQL, new PostMapper(), id);
+            LOGGER.debug("get post by id success");
+            return post;
+        } catch (EmptyResultDataAccessException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
+    public Post getPostByMessage(String message, int thread){
+        try {
+            final String SQL = "SELECT * FROM post WHERE thread = ? AND message = ?";
+            Post post = jdbcTemplate.queryForObject(SQL, new PostMapper(), thread, message);
+            LOGGER.debug("get post by message success");
+            return post;
+        } catch (EmptyResultDataAccessException e){
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
     public void updatePost(String message, int id) {
         String SQL = "UPDATE post SET message = ?, isedited = " + true + " WHERE id = ?";
         jdbcTemplate.update(SQL, message, id);

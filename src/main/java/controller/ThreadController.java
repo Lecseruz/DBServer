@@ -29,12 +29,14 @@ public class ThreadController {
     private final ThreadJDBCTemplate threadJDBCTemplate;
     private final PostJDBCTemplate postJDBCTemplate;
     private final VoiceJDBCTemplate voiceJDBCTemplate;
+    private final UserJDBCTemplate userJDBCTemplate;
 
     @Autowired
-    public ThreadController(VoiceJDBCTemplate voiceJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate, StatusJDBCTemplate statusJDBCTemplate, UserJDBCTemplate userJDBCTemplate) {
+    public ThreadController(VoiceJDBCTemplate voiceJDBCTemplate, UserJDBCTemplate userJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate) {
         this.threadJDBCTemplate = threadJDBCTemplate;
         this.postJDBCTemplate = postJDBCTemplate;
         this.voiceJDBCTemplate = voiceJDBCTemplate;
+        this.userJDBCTemplate = userJDBCTemplate;
     }
 
     @RequestMapping(value = "/{slug_or_id}/create", method = RequestMethod.POST)
@@ -48,9 +50,18 @@ public class ThreadController {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
             }
             for (Post post : posts) {
+                userJDBCTemplate.getUserByNickname(post.getAuthor());
                 post.setForum(thread.getForum());
                 post.setThread(thread.getId());
                 post.setCreated(thread.getCreated());
+                if(post.getParent() != 0) {
+                    Post parent = postJDBCTemplate.getPostById(post.getParent());
+                    post.setForum(thread.getForum());
+                    post.setThread(thread.getId());
+                    if (parent == null || thread.getId() != parent.getThread()) {
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+                    }
+                }
             }
         } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
@@ -71,6 +82,7 @@ public class ThreadController {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
             }
             voiceJDBCTemplate.createVoice(voice);
+            userJDBCTemplate.getUserByNickname(voice.getNickname());
             if (voice.getVoice() == 1)
                 thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() + 1));
             else {
