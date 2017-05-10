@@ -46,9 +46,9 @@ USER root
 RUN apt-get install -y openjdk-8-jdk-headless maven
 
 ENV WORK /opt/DBServer
-ADD java/ $WORK/java
+ADD ./ $WORK/
 
-WORKDIR $WORK/java
+WORKDIR $WORK
 
 RUN mvn package
 
