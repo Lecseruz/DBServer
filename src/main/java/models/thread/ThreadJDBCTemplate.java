@@ -41,7 +41,7 @@ public class ThreadJDBCTemplate {
     }
 
     public void dropTable() {
-        String query = "DROP TABLE IF EXISTS thread CASCADE ";
+        final String query = "DROP TABLE IF EXISTS thread CASCADE ";
 
         jdbcTemplate.execute(query);
         LOGGER.debug("drop table success");

@@ -40,7 +40,7 @@ public class StatusJDBCTemplate implements StatusDAO {
 
     @Override
     public Status getStatus() {
-        Status status = new Status(userJDBCTemplate.getCount(), forumJDBCTemplate.getCount(),  threadJDBCTemplate.getCount(), postJDBCTemplate.getCount());
+        final Status status = new Status(userJDBCTemplate.getCount(), forumJDBCTemplate.getCount(),  threadJDBCTemplate.getCount(), postJDBCTemplate.getCount());
         LOGGER.debug("get status success");
         return status;
     }
