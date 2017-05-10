@@ -46,7 +46,7 @@ USER root
 RUN apt-get update
 RUN apt-get install -y openjdk-8-jdk-headless
 RUN apt-get update
-RUN apt-get maven
+RUN apt-get install -y maven
 
 ENV WORK /opt/DBServer
 ADD ./ $WORK/
