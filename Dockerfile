@@ -9,7 +9,7 @@ RUN apt-get -y update
 # Установка postgresql
 #
 ENV PGVER 9.5
-RUN apt-get install -y postgresql-$PGVER
+RUN apt-get install -y postgresql
 
 # Run the rest of the commands as the ``postgres`` author created by the ``postgres-$PGVER`` package when it was ``apt-get installed``
 USER postgres
@@ -43,7 +43,10 @@ USER root
 
  # Установка JDK
 
-RUN apt-get install -y openjdk-8-jdk-headless maven
+RUN apt-get update
+RUN apt-get install -y openjdk-8-jdk-headless
+RUN apt-get update
+RUN apt-get maven
 
 ENV WORK /opt/DBServer
 ADD ./ $WORK/
