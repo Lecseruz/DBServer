@@ -1,0 +1,42 @@
+Logging Provider: org.jboss.logging.Log4jLoggerProvider
+HV000001: Hibernate Validator 5.3.4.Final
+Cannot find javax.persistence.Persistence on classpath. Assuming non JPA 2 environment. All properties will per default be traversable.
+Cannot find javax.persistence.Persistence on classpath. Assuming non JPA 2 environment. All properties will per default be traversable.
+Cannot find javax.persistence.Persistence on classpath. Assuming non JPA 2 environment. All properties will per default be traversable.
+Setting custom MessageInterpolator of type org.springframework.validation.beanvalidation.LocaleContextMessageInterpolator
+Setting custom ConstraintValidatorFactory of type org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory
+Setting custom ParameterNameProvider of type com.sun.proxy.$Proxy38
+Trying to load META-INF/validation.xml for XML based Validator configuration.
+Trying to load META-INF/validation.xml via user class loader
+Trying to load META-INF/validation.xml via TCCL
+Trying to load META-INF/validation.xml via Hibernate Validator's class loader
+No META-INF/validation.xml found. Using annotation based configuration only.
+Cannot find javax.persistence.Persistence on classpath. Assuming non JPA 2 environment. All properties will per default be traversable.
+Cannot find javax.persistence.Persistence on classpath. Assuming non JPA 2 environment. All properties will per default be traversable.
+Setting custom MessageInterpolator of type org.springframework.validation.beanvalidation.LocaleContextMessageInterpolator
+Setting custom ConstraintValidatorFactory of type org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory
+Setting custom ParameterNameProvider of type com.sun.proxy.$Proxy38
+Trying to load META-INF/validation.xml for XML based Validator configuration.
+Trying to load META-INF/validation.xml via user class loader
+Trying to load META-INF/validation.xml via TCCL
+Trying to load META-INF/validation.xml via Hibernate Validator's class loader
+No META-INF/validation.xml found. Using annotation based configuration only.
+drop table success
+drop table success
+drop table success
+drop success
+drop table success
+CREATE EXTENSION IF NOT EXISTS citext; CREATE TABLE IF NOT EXISTS m_user ( id SERIAL NOT NULL PRIMARY KEY,nickname CITEXT UNIQUE NOT NULL, fullname VARCHAR(128) NOT NULL, abbout TEXT NOT NULL, email CITEXT UNIQUE NOT NULL); 
+CREATE TABLE IF NOT EXISTS forum ( title VARCHAR(128) NOT NULL, admin CITEXT NOT NULL, slug CITEXT UNIQUE NOT NULL, posts BIGINT NOT NULL DEFAULT 0, threads BIGINT NOT NULL DEFAULT 0, FOREIGN KEY (admin) REFERENCES m_user(nickname))create table success
+CREATE EXTENSION IF NOT EXISTS citext; CREATE TABLE IF NOT EXISTS thread ( id SERIAL PRIMARY KEY, title VARCHAR(128) NOT NULL, author CITEXT NOT NULL, forum CITEXT NOT NULL, message TEXT NOT NULL, votes BIGINT NOT NULL DEFAULT 0, slug CITEXT UNIQUE, created TIMESTAMP NOT NULL DEFAULT current_timestamp, FOREIGN KEY (author) REFERENCES m_user(nickname)); success
+CREATE EXTENSION IF NOT EXISTS citext; CREATE TABLE IF NOT EXISTS voice ( id SERIAL PRIMARY KEY, nickname CITEXT UNIQUE NOT NULL, count int NOT NULL); success
+CREATE EXTENSION IF NOT EXISTS citext; CREATE TABLE IF NOT EXISTS post ( id SERIAL PRIMARY KEY, parent_id BIGINT NOT NULL DEFAULT 0, author CITEXT NOT NULL, message TEXT NOT NULL, isEdited BOOLEAN NOT NULL DEFAULT false, forum CITEXT NOT NULL, thread BIGINT NOT NULL, created TIMESTAMP NOT NULL DEFAULT current_timestamp);CREATE UNIQUE INDEX  ON post (id); CREATE INDEX  ON post (author); CREATE INDEX  ON post (forum); CREATE INDEX  ON post (thread);create table success
+Cannot find javax.persistence.Persistence on classpath. Assuming non JPA 2 environment. All properties will per default be traversable.
+Setting custom MessageInterpolator of type org.springframework.validation.beanvalidation.LocaleContextMessageInterpolator
+Setting custom ConstraintValidatorFactory of type org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory
+Setting custom ParameterNameProvider of type com.sun.proxy.$Proxy38
+Trying to load META-INF/validation.xml for XML based Validator configuration.
+Trying to load META-INF/validation.xml via user class loader
+Trying to load META-INF/validation.xml via TCCL
+Trying to load META-INF/validation.xml via Hibernate Validator's class loader
+No META-INF/validation.xml found. Using annotation based configuration only.

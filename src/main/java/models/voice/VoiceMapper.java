@@ -14,8 +14,8 @@ public class VoiceMapper implements RowMapper<Voice> {
     public Voice mapRow(ResultSet resultSet, int i) throws SQLException {
         Voice voice = new Voice();
         voice.setNickname(resultSet.getString("nickname"));
-        int id = resultSet.getInt("id");
         voice.setVoice(resultSet.getInt("count"));
+        voice.setThread_id(resultSet.getInt("thread_id"));
         return voice;
     }
 }

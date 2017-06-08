@@ -41,10 +41,10 @@ public class UserController {
 
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public ResponseEntity<?> getUser(@PathVariable(value = "nickname") String nickname) throws IOException {
-        try {
-            final User user = userJDBCTemplate.getUserByNickname(nickname);
+        final User user = userJDBCTemplate.getUserByNickname(nickname);
+        if (user != null) {
             return ResponseEntity.ok(user);
-        } catch (EmptyResultDataAccessException e) {
+        } else {
             return ResponseEntity.notFound().build();
         }
     }
@@ -53,7 +53,9 @@ public class UserController {
     public ResponseEntity<?> updateUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
         user.setNickname(nickname);
         try {
-            userJDBCTemplate.getUserByNickname(nickname);
+            if (userJDBCTemplate.getUserByNickname(nickname) == null){
+                return ResponseEntity.notFound().build();
+            }
             if (user.getFullname() != null){
                 userJDBCTemplate.updateFullname(user.getFullname(), nickname);
             }
@@ -63,11 +65,7 @@ public class UserController {
             if (user.getEmail() != null){
                 userJDBCTemplate.updateEmail(user.getEmail(), nickname);
             }
-        } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.notFound().build();
-        }
-
-        catch (DuplicateKeyException d){
+        }catch (DuplicateKeyException d){
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         return ResponseEntity.ok(userJDBCTemplate.getUserByNickname(nickname));

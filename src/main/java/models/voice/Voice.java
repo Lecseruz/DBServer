@@ -8,6 +8,8 @@ public class Voice {
 
     private int voice;
 
+    private int thread_id;
+
     public String getNickname() {
         return nickname;
     }
@@ -22,5 +24,21 @@ public class Voice {
 
     public void setVoice(int voice) {
         this.voice = voice;
+    }
+
+    @Override
+    public String toString() {
+        return "Voice{" +
+                "nickname='" + nickname + '\'' +
+                ", voice=" + voice +
+                '}';
+    }
+
+    public int getThread_id() {
+        return thread_id;
+    }
+
+    public void setThread_id(int thread_id) {
+        this.thread_id = thread_id;
     }
 }

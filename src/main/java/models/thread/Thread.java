@@ -102,4 +102,18 @@ public class Thread {
     public void setVotes(int votes) {
         this.votes = votes;
     }
+
+    @Override
+    public String toString() {
+        return "Thread{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", forum='" + forum + '\'' +
+                ", message='" + message + '\'' +
+                ", votes=" + votes +
+                ", slug='" + slug + '\'' +
+                ", created='" + created + '\'' +
+                '}';
+    }
 }

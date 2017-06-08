@@ -2,6 +2,7 @@ package models.thread;
 
 import config.TimestampHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
@@ -60,21 +61,21 @@ public class ThreadJDBCTemplate {
         }
         String subQuery =
                 "UPDATE forum SET threads = threads + 1 " +
-                "WHERE slug = ? ;";
+                        "WHERE slug = ? ;";
         jdbcTemplate.update(subQuery, thread.getForum());
         LOGGER.debug("created" + thread.getTitle() + " with user ");
         thread.setId(id);
     }
 
-    public Thread updateThread(ThreadUpdate threadUpdate, String slug){
+    public Thread updateThread(ThreadUpdate threadUpdate, String slug) {
         if (threadUpdate.getMessage() != null || threadUpdate.getTitle() != null) {
             String SQL = "UPDATE thread SET ";
-            if (threadUpdate.getTitle() != null){
+            if (threadUpdate.getTitle() != null) {
                 SQL += "title = '" + threadUpdate.getTitle() + "' ";
             }
-            if (threadUpdate.getMessage() != null){
-                if (threadUpdate.getTitle() != null){
-                    SQL+= ", ";
+            if (threadUpdate.getMessage() != null) {
+                if (threadUpdate.getTitle() != null) {
+                    SQL += ", ";
                 }
                 SQL += "message = '" + threadUpdate.getMessage() + "' ";
             }
@@ -86,17 +87,27 @@ public class ThreadJDBCTemplate {
     }
 
     public Thread getThreadById(int id) {
-        String SQL = "SELECT * FROM thread WHERE id = ?";
-        Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{id}, new ThreadMapper());
-        LOGGER.debug("getThreadById success");
-        return thread;
+        try {
+            String SQL = "SELECT * FROM thread WHERE id = ?";
+            Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{id}, new ThreadMapper());
+            LOGGER.debug("getThreadById success");
+            return thread;
+        } catch (EmptyResultDataAccessException e) {
+            LOGGER.error(e);
+            return null;
+        }
     }
 
     public Thread getThreadBySlug(String slug) {
-        String SQL = "SELECT * FROM thread WHERE lower(slug) = lower(?)";
-        Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{slug}, new ThreadMapper());
-        LOGGER.debug("getThreadById success");
-        return thread;
+        try {
+            String SQL = "SELECT * FROM thread WHERE lower(slug) = lower(?)";
+            Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{slug}, new ThreadMapper());
+            LOGGER.debug("getThreadById success");
+            return thread;
+        } catch (EmptyResultDataAccessException e) {
+            LOGGER.error(e);
+            return null;
+        }
     }
 
     public List<Thread> getThreads(String slug, boolean desc, int limit, String timestamp) {
@@ -139,10 +150,17 @@ public class ThreadJDBCTemplate {
         return count;
     }
 
-    public int updateVoice(String slug, int count) {
+    public int updateVoiceBySlug(String slug, int count) {
         String SQL = "UPDATE thread SET votes = ? WHERE lower(slug) = lower(?) RETURNING votes";
         int voice = jdbcTemplate.queryForObject(SQL, Integer.class, count, slug);
-        LOGGER.debug("updateVoice success");
+        LOGGER.debug("updateVoiceBySlug success");
+        return voice;
+    }
+
+    public int updateVoiceById(int id, int count) {
+        String SQL = "UPDATE thread SET votes = ? WHERE id = ? RETURNING votes";
+        int voice = jdbcTemplate.queryForObject(SQL, Integer.class, count, id);
+        LOGGER.debug("updateVoiceById success");
         return voice;
     }
 }

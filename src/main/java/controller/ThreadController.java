@@ -6,9 +6,11 @@ import models.post.PostJDBCTemplate;
 import models.thread.Thread;
 import models.thread.ThreadJDBCTemplate;
 import models.thread.ThreadUpdate;
+import models.user.User;
 import models.user.UserJDBCTemplate;
 import models.voice.Voice;
 import models.voice.VoiceJDBCTemplate;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -29,6 +31,8 @@ public class ThreadController {
     private final PostJDBCTemplate postJDBCTemplate;
     private final VoiceJDBCTemplate voiceJDBCTemplate;
     private final UserJDBCTemplate userJDBCTemplate;
+    private static final Logger LOGGER = Logger.getLogger(ThreadController.class);
+
 
     @Autowired
     public ThreadController(VoiceJDBCTemplate voiceJDBCTemplate, UserJDBCTemplate userJDBCTemplate, PostJDBCTemplate postJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate) {
@@ -48,8 +52,13 @@ public class ThreadController {
             } catch (NumberFormatException ignored) {
                 thread = threadJDBCTemplate.getThreadBySlug(slug);
             }
+            if (thread == null) {
+                return ResponseEntity.notFound().build();
+            }
             for (Post post : posts) {
-                userJDBCTemplate.getUserByNickname(post.getAuthor());
+                if (userJDBCTemplate.getUserByNickname(post.getAuthor()) == null) {
+                    return ResponseEntity.notFound().build();
+                }
                 post.setForum(thread.getForum());
                 post.setThread(thread.getId());
                 post.setCreated(thread.getCreated());
@@ -74,69 +83,70 @@ public class ThreadController {
     public ResponseEntity<?> createVoice(@PathVariable(value = "slug_or_id") String slug, @RequestBody Voice voice) throws IOException {
         Thread thread = null;
         try {
-            try {
-                final int a = Integer.parseInt(slug);
-                thread = threadJDBCTemplate.getThreadById(a);
-            } catch (NumberFormatException ignored) {
-                thread = threadJDBCTemplate.getThreadBySlug(slug);
-            }
-            voiceJDBCTemplate.createVoice(voice);
-            userJDBCTemplate.getUserByNickname(voice.getNickname());
-            if (voice.getVoice() == 1)
-                thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() + 1));
-            else {
-                thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() - 1));
-            }
-            return ResponseEntity.status(HttpStatus.OK).body(thread);
-        } catch (EmptyResultDataAccessException e) {
+            final int a = Integer.parseInt(slug);
+            thread = threadJDBCTemplate.getThreadById(a);
+        } catch (NumberFormatException ignored) {
+            thread = threadJDBCTemplate.getThreadBySlug(slug);
+        }
+        final User user = userJDBCTemplate.getUserByNickname(voice.getNickname());
+        if (thread == null || user == null) {
             return ResponseEntity.notFound().build();
-        } catch (DuplicateKeyException e) {
-            if (!(voice.getVoice() == voiceJDBCTemplate.getVoiceWithNickname(voice.getNickname()).getVoice())) {
+        }
+        voice.setThread_id(thread.getId());
+        Voice voice1 = voiceJDBCTemplate.getVoiceWithNicknameAndThread(voice.getNickname(), thread.getId());
+        if (voice1 == null) {
+            voiceJDBCTemplate.createVoice(voice);
+            if (voice.getVoice() == 1) {
+                thread.setVotes(threadJDBCTemplate.updateVoiceById(thread.getId(), thread.getVotes() + 1));
+            } else {
+                thread.setVotes(threadJDBCTemplate.updateVoiceById(thread.getId(), thread.getVotes() - 1));
+            }
+        } else {
+            if (voice1.getVoice() != voice.getVoice()) {
+                voiceJDBCTemplate.updateVoice(voice);
                 if (voice.getVoice() == 1) {
-                    assert thread != null;
-                    thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() + 2));
-                    voiceJDBCTemplate.updateVoice(voice.getVoice(), voice.getNickname());
+                    thread.setVotes(threadJDBCTemplate.updateVoiceById(thread.getId(), thread.getVotes() + 2));
                 } else {
-                    assert thread != null;
-                    thread.setVotes(threadJDBCTemplate.updateVoice(thread.getSlug(), thread.getVotes() - 2));
-                    voiceJDBCTemplate.updateVoice(voice.getVoice(), voice.getNickname());
+                    thread.setVotes(threadJDBCTemplate.updateVoiceById(thread.getId(), thread.getVotes() - 2));
                 }
             }
-            return ResponseEntity.ok(thread);
         }
+        LOGGER.debug(voice.toString());
+        LOGGER.debug(thread.toString());
+        return ResponseEntity.ok(thread);
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.GET)
     public ResponseEntity<?> getThreads(@PathVariable(value = "slug_or_id") String slug) throws IOException {
+        Thread thread;
         try {
-            Thread thread;
-            try {
-                final int id = Integer.parseInt(slug);
-                thread = threadJDBCTemplate.getThreadById(id);
-            } catch (NumberFormatException ignored) {
-                thread = threadJDBCTemplate.getThreadBySlug(slug);
-            }
+            final int id = Integer.parseInt(slug);
+            thread = threadJDBCTemplate.getThreadById(id);
+        } catch (NumberFormatException ignored) {
+            thread = threadJDBCTemplate.getThreadBySlug(slug);
+        }
+        if (thread != null) {
             return ResponseEntity.ok(thread);
-        } catch (EmptyResultDataAccessException e) {
+        } else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.POST)
-    public ResponseEntity<?> updateThreads(@PathVariable(value = "slug_or_id") String slug, @RequestBody ThreadUpdate threadUpdate) throws IOException {
+    public ResponseEntity<?> updateThreads(@PathVariable(value = "slug_or_id") String
+                                                   slug, @RequestBody ThreadUpdate threadUpdate) throws IOException {
+        Thread thread;
         try {
-            Thread thread;
-            try {
-                final int a = Integer.parseInt(slug);
-                thread = threadJDBCTemplate.getThreadById(a);
-            } catch (NumberFormatException ignored) {
-                thread = threadJDBCTemplate.getThreadBySlug(slug);
-            }
-            final Thread newThread = threadJDBCTemplate.updateThread(threadUpdate, thread.getSlug());
-            return ResponseEntity.ok(newThread);
-        } catch (EmptyResultDataAccessException e) {
+            final int a = Integer.parseInt(slug);
+            thread = threadJDBCTemplate.getThreadById(a);
+        } catch (NumberFormatException ignored) {
+            thread = threadJDBCTemplate.getThreadBySlug(slug);
+        }
+        if (thread == null) {
             return ResponseEntity.notFound().build();
         }
+        final Thread newThread = threadJDBCTemplate.updateThread(threadUpdate, thread.getSlug());
+        return ResponseEntity.ok(newThread);
     }
 
     @RequestMapping(path = "/{slug_or_id}/posts", method = RequestMethod.GET)
@@ -147,16 +157,15 @@ public class ThreadController {
                                       @RequestParam(name = "desc", required = false) Boolean desc) {
         Thread thread;
         try {
-            try {
-                final int a = Integer.parseInt(slug);
-                thread = threadJDBCTemplate.getThreadById(a);
-            } catch (NumberFormatException ignored) {
-                thread = threadJDBCTemplate.getThreadBySlug(slug);
-            }
-        } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.notFound().build();
+            final int a = Integer.parseInt(slug);
+            thread = threadJDBCTemplate.getThreadById(a);
+        } catch (NumberFormatException ignored) {
+            thread = threadJDBCTemplate.getThreadBySlug(slug);
         }
 
+        if (thread == null) {
+            return ResponseEntity.notFound().build();
+        }
         if (sort == null) {
             sort = "flat";
         }
@@ -164,10 +173,14 @@ public class ThreadController {
             desc = false;
         }
         final ResponsePosts responsePosts = new ResponsePosts();
-        final List<Post> posts = postJDBCTemplate.getByThread(thread.getId(), limit, marker, sort, desc);
-
-        responsePosts.setMarker("some marker");
-        responsePosts.setPosts(posts);
-        return ResponseEntity.ok(responsePosts);
+        try {
+            final List<Post> posts = postJDBCTemplate.getByThread(thread.getId(), limit, marker, sort, desc);
+            responsePosts.setMarker("some marker");
+            responsePosts.setPosts(posts);
+            return ResponseEntity.ok(responsePosts);
+        } catch (RuntimeException e){
+            LOGGER.error(e);
+            return ResponseEntity.notFound().build();
+        }
     }
 }

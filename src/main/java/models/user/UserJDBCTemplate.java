@@ -6,13 +6,13 @@ import java.util.List;
 import models.post.Post;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class UserJDBCTemplate {
 
     private final JdbcTemplate jdbcTemplate;
@@ -52,10 +52,14 @@ public class UserJDBCTemplate {
     }
 
     public User getUserByNickname(String nickname) {
-        String SQL = "SELECT * FROM m_user WHERE LOWER(nickname) = LOWER(?)";
-        User users = jdbcTemplate.queryForObject(SQL, new UserMapper(), nickname);
-        LOGGER.debug("getUserByNickname success");
-        return users;
+        try {
+            final String SQL = "SELECT * FROM m_user WHERE LOWER(nickname) = LOWER(?)";
+            final User users = jdbcTemplate.queryForObject(SQL, new UserMapper(), nickname);
+            LOGGER.debug("getUserByNickname success");
+            return users;
+        } catch (EmptyResultDataAccessException e){
+            return null;
+        }
     }
 
     public List<User> getUserByNicknameAndEmail(String nickname, String email) {

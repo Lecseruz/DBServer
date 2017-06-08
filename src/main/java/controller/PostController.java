@@ -7,6 +7,7 @@ import models.post.PostJDBCTemplate;
 import models.post.PostUpdate;
 import models.thread.ThreadJDBCTemplate;
 import models.user.UserJDBCTemplate;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,9 @@ public class PostController {
     private final ThreadJDBCTemplate threadJDBCTemplate;
     private final ForumJDBCTemplate forumJDBCTemplate;
 
+    private static final Logger LOGGER = Logger.getLogger("PostController");
+
+
     @Autowired
     public PostController(PostJDBCTemplate postJDBCTemplate, UserJDBCTemplate userJDBCTemplate, ThreadJDBCTemplate threadJDBCTemplate, ForumJDBCTemplate forumJDBCTemplate) {
         this.postJDBCTemplate = postJDBCTemplate;
@@ -39,15 +43,19 @@ public class PostController {
         try {
             final Post post = postJDBCTemplate.getPostById(id);
             if (post == null) {
+                LOGGER.debug("post not found");
                 return ResponseEntity.notFound().build();// TODO : bad
             }
             if (!post.getMessage().equals(postUpdate.getMessage())) {
                 final Post newPost = postJDBCTemplate.updatePost(postUpdate.getMessage(), post.getId());
+                LOGGER.debug("post update success");
                 return ResponseEntity.ok(newPost);
             } else{
+                LOGGER.debug("post update success");
                 return ResponseEntity.ok(post);
             }
         } catch (EmptyResultDataAccessException e) {
+            LOGGER.debug(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -58,6 +66,7 @@ public class PostController {
             final ResponseInfoPost responseInfoPost = new ResponseInfoPost();
             responseInfoPost.setPost(postJDBCTemplate.getPostById(id));
             if (responseInfoPost.getPost() == null){
+                LOGGER.debug("post not found");
                 return ResponseEntity.notFound().build();// TODO : bad
             }
             if (related != null) {
@@ -71,8 +80,10 @@ public class PostController {
                     responseInfoPost.setThread(threadJDBCTemplate.getThreadById(responseInfoPost.getPost().getThread()));
                 }
             }
+            LOGGER.debug("information about post get success");
             return ResponseEntity.ok(responseInfoPost);
         } catch (EmptyResultDataAccessException e) {
+            LOGGER.debug(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
