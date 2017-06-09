@@ -25,7 +25,7 @@ public class StatusJDBCTemplate implements StatusDAO {
     private final PostJDBCTemplate postJDBCTemplate;
     private final ThreadJDBCTemplate threadJDBCTemplate;
     private final VoiceJDBCTemplate voiceJDBCTemplate;
-    private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(StatusJDBCTemplate.class);
+//    private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(StatusJDBCTemplate.class);
 
 
     @Autowired
@@ -41,7 +41,7 @@ public class StatusJDBCTemplate implements StatusDAO {
     @Override
     public Status getStatus() {
         final Status status = new Status(userJDBCTemplate.getCount(), forumJDBCTemplate.getCount(),  threadJDBCTemplate.getCount(), postJDBCTemplate.getCount());
-        LOGGER.debug("get status success");
+//        LOGGER.debug("get status success");
         return status;
     }
 

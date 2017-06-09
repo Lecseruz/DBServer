@@ -19,7 +19,7 @@ public class PostJDBCTemplate {
 
     private final JdbcTemplate jdbcTemplate;
     private int marker = 0;// TODO: гавнокод
-    private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
+//    private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
 
     @Autowired
     public PostJDBCTemplate(JdbcTemplate jdbcTemplate) {
@@ -43,8 +43,8 @@ public class PostJDBCTemplate {
                         "CREATE INDEX  ON post (forum); " +
                         "CREATE INDEX  ON post (thread);";
 
-        LOGGER.debug(sql +
-                "create table success");
+//        LOGGER.debug(sql +
+//                "create table success");
 
         jdbcTemplate.execute(sql);
     }
@@ -53,7 +53,7 @@ public class PostJDBCTemplate {
         String query = "DROP TABLE IF EXISTS post";
 
         jdbcTemplate.execute(query);
-        LOGGER.debug("drop table success");
+//        LOGGER.debug("drop table success");
 
     }
 
@@ -69,7 +69,7 @@ public class PostJDBCTemplate {
             post.setId(id);
         }
         marker = 0;// TODO: гавнокод
-        LOGGER.debug("create posts with user ");
+//        LOGGER.debug("create posts with user ");
     }
 
     public void create(Post post) {
@@ -80,13 +80,13 @@ public class PostJDBCTemplate {
                         "WHERE slug = ? ;";
         marker = 0;// TODO: гавнокод
         jdbcTemplate.update(sqlForum, post.getForum());
-        LOGGER.debug("created" + post.getId() + " with user ");
+//        LOGGER.debug("created" + post.getId() + " with user ");
     }
 
     public int getCount() {
         String SQL = "SELECT COUNT(*) FROM post";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        LOGGER.debug("getVoiceWithNickname success");
+//        LOGGER.debug("getVoiceWithNickname success");
         return count;
     }
 
@@ -102,7 +102,7 @@ public class PostJDBCTemplate {
         SQL += " OFFSET ? ";
 
         List<Post> posts = jdbcTemplate.query(SQL, new PostMapper(), id, limit, offset);
-        LOGGER.debug("get posts success");
+//        LOGGER.debug("get posts success");
         marker += posts.size();// TODO: гавнокод
         return posts;
     }
@@ -125,7 +125,7 @@ public class PostJDBCTemplate {
         List<Map<String, Object>> rows;
         final List<Post> posts = jdbcTemplate.query(sql, new PostMapper(), id, limit, offset);
         marker += posts.size();// TODO: гавнокод
-        LOGGER.debug("get posts success");
+//        LOGGER.debug("get posts success");
         return posts;
     }
 
@@ -155,7 +155,7 @@ public class PostJDBCTemplate {
             posts.addAll(rows);
         }
         marker += parentPosts.size();// TODO: гавнокод
-        LOGGER.debug("parentTree success");
+//        LOGGER.debug("parentTree success");
         return posts;
     }
 
@@ -185,7 +185,7 @@ public class PostJDBCTemplate {
         final String SQL = "SELECT * FROM post WHERE id = ?";
         try {
             Post post = jdbcTemplate.queryForObject(SQL, new PostMapper(), id);
-            LOGGER.debug("get post by id success");
+//            LOGGER.debug("get post by id success");
             return post;
         } catch (EmptyResultDataAccessException e) {
             System.out.println(e.getMessage());
@@ -197,7 +197,7 @@ public class PostJDBCTemplate {
         try {
             final String SQL = "SELECT * FROM post WHERE thread = ? AND message = ?";
             Post post = jdbcTemplate.queryForObject(SQL, new PostMapper(), thread, message);
-            LOGGER.debug("get post by message success");
+//            LOGGER.debug("get post by message success");
             return post;
         } catch (EmptyResultDataAccessException e){
             System.out.println(e.getMessage());
@@ -208,13 +208,13 @@ public class PostJDBCTemplate {
         if (message != null) {
             String SQL = "UPDATE post SET message = ?, isedited = " + true + " WHERE id = ?";
             jdbcTemplate.update(SQL, message, id);
-            LOGGER.debug("uodate post success");
+//            LOGGER.debug("uodate post success");
         }
         return getPostById(id);
     }
     public void delete() {
         final String SQL = "DELETE FROM post";
         jdbcTemplate.update(SQL);
-        System.out.println("Deleted Record");
+//        System.out.println("Deleted Record");
     }
 }

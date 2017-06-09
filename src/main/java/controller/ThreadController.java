@@ -111,8 +111,8 @@ public class ThreadController {
                 }
             }
         }
-        LOGGER.debug(voice.toString());
-        LOGGER.debug(thread.toString());
+//        LOGGER.debug(voice.toString());
+//        LOGGER.debug(thread.toString());
         return ResponseEntity.ok(thread);
     }
 

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class VoiceJDBCTemplate {
     private JdbcTemplate jdbcTemplate;
 
-    private static final Logger LOGGER = Logger.getLogger(VoiceJDBCTemplate.class);
+//    private static final Logger LOGGER = Logger.getLogger(VoiceJDBCTemplate.class);
 
     @Autowired
     public VoiceJDBCTemplate(JdbcTemplate jdbcTemplate) {
@@ -29,7 +29,7 @@ public class VoiceJDBCTemplate {
                         "nickname CITEXT NOT NULL, " +
                         "count int NOT NULL," +
                         "thread_id int NOT NULL); ";
-        LOGGER.debug(query + "success");
+//        LOGGER.debug(query + "success");
 
         jdbcTemplate.execute(query);
     }
@@ -37,13 +37,13 @@ public class VoiceJDBCTemplate {
     public void dropTable() {
         String query = "DROP TABLE IF EXISTS voice";
         jdbcTemplate.execute(query);
-        LOGGER.debug("drop table success");
+//        LOGGER.debug("drop table success");
     }
 
     public int createVoice(Voice voice) {
         String SQL = "INSERT INTO voice (nickname, count, thread_id) VALUES(?,?,?) RETURNING id";
         int id = jdbcTemplate.queryForObject(SQL, Integer.class, voice.getNickname(), voice.getVoice(), voice.getThread_id());
-        LOGGER.debug("create succes");
+//        LOGGER.debug("create succes");
         return id;
     }
 
@@ -51,7 +51,7 @@ public class VoiceJDBCTemplate {
         try {
             String SQL = "SELECT * FROM voice WHERE LOWER(nickname) = LOWER(?) AND thread_id = ?";
             Voice voice = jdbcTemplate.queryForObject(SQL, new VoiceMapper(), nickname, thread_id);
-            LOGGER.debug("succes");
+//            LOGGER.debug("succes");
             return voice;
         }catch (EmptyResultDataAccessException e){
             return null;
@@ -61,6 +61,6 @@ public class VoiceJDBCTemplate {
     public void updateVoice(Voice voice) {
         String SQL = "UPDATE voice SET count = ? WHERE LOWER(nickname) = LOWER(?) and thread_id = ?";
         jdbcTemplate.update(SQL, voice.getVoice(), voice.getNickname(), voice.getThread_id());
-        LOGGER.debug("update success");
+//        LOGGER.debug("update success");
     }
 }

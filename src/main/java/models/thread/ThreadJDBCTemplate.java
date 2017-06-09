@@ -16,7 +16,7 @@ public class ThreadJDBCTemplate {
 
     private JdbcTemplate jdbcTemplate;
 
-    private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
+//    private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
 
     @Autowired
     public ThreadJDBCTemplate(JdbcTemplate jdbcTemplate) {
@@ -36,7 +36,7 @@ public class ThreadJDBCTemplate {
                         "slug CITEXT UNIQUE, " +
                         "created TIMESTAMP NOT NULL DEFAULT current_timestamp, " +
                         "FOREIGN KEY (author) REFERENCES m_user(nickname)); ";
-        LOGGER.debug(query + "success");
+//        LOGGER.debug(query + "success");
 
         jdbcTemplate.execute(query);
     }
@@ -45,7 +45,7 @@ public class ThreadJDBCTemplate {
         final String query = "DROP TABLE IF EXISTS thread CASCADE ";
 
         jdbcTemplate.execute(query);
-        LOGGER.debug("drop table success");
+//        LOGGER.debug("drop table success");
 
     }
 
@@ -63,7 +63,7 @@ public class ThreadJDBCTemplate {
                 "UPDATE forum SET threads = threads + 1 " +
                         "WHERE slug = ? ;";
         jdbcTemplate.update(subQuery, thread.getForum());
-        LOGGER.debug("created" + thread.getTitle() + " with user ");
+//        LOGGER.debug("created" + thread.getTitle() + " with user ");
         thread.setId(id);
     }
 
@@ -82,7 +82,7 @@ public class ThreadJDBCTemplate {
             SQL += "WHERE lower(slug) = lower(?)";
             jdbcTemplate.update(SQL, slug);
         }
-        LOGGER.debug("updateThread success");
+//        LOGGER.debug("updateThread success");
         return getThreadBySlug(slug);
     }
 
@@ -90,10 +90,10 @@ public class ThreadJDBCTemplate {
         try {
             String SQL = "SELECT * FROM thread WHERE id = ?";
             Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{id}, new ThreadMapper());
-            LOGGER.debug("getThreadById success");
+//            LOGGER.debug("getThreadById success");
             return thread;
         } catch (EmptyResultDataAccessException e) {
-            LOGGER.error(e);
+//            LOGGER.error(e);
             return null;
         }
     }
@@ -102,10 +102,10 @@ public class ThreadJDBCTemplate {
         try {
             String SQL = "SELECT * FROM thread WHERE lower(slug) = lower(?)";
             Thread thread = jdbcTemplate.queryForObject(SQL, new Object[]{slug}, new ThreadMapper());
-            LOGGER.debug("getThreadById success");
+//            LOGGER.debug("getThreadById success");
             return thread;
         } catch (EmptyResultDataAccessException e) {
-            LOGGER.error(e);
+//            LOGGER.error(e);
             return null;
         }
     }
@@ -133,34 +133,34 @@ public class ThreadJDBCTemplate {
         } else {
             threads = jdbcTemplate.query(SQL, new ThreadMapper(), slug);
         }
-        LOGGER.debug("getThreads success");
+//        LOGGER.debug("getThreads success");
         return threads;
     }
 
     public void delete() {
         String SQL = "DELETE FROM thread";
         jdbcTemplate.update(SQL);
-        LOGGER.debug("Deleted Record");
+//        LOGGER.debug("Deleted Record");
     }
 
     public int getCount() {
         String SQL = "SELECT COUNT(*) FROM thread";
         int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-        LOGGER.debug("getVoiceWithNickname success");
+//        LOGGER.debug("getVoiceWithNickname success");
         return count;
     }
 
     public int updateVoiceBySlug(String slug, int count) {
         String SQL = "UPDATE thread SET votes = ? WHERE lower(slug) = lower(?) RETURNING votes";
         int voice = jdbcTemplate.queryForObject(SQL, Integer.class, count, slug);
-        LOGGER.debug("updateVoiceBySlug success");
+//        LOGGER.debug("updateVoiceBySlug success");
         return voice;
     }
 
     public int updateVoiceById(int id, int count) {
         String SQL = "UPDATE thread SET votes = ? WHERE id = ? RETURNING votes";
         int voice = jdbcTemplate.queryForObject(SQL, Integer.class, count, id);
-        LOGGER.debug("updateVoiceById success");
+//        LOGGER.debug("updateVoiceById success");
         return voice;
     }
 }
