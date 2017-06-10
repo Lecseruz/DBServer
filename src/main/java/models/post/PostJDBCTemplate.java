@@ -41,7 +41,8 @@ public class PostJDBCTemplate {
                         "CREATE UNIQUE INDEX  ON post (id); " +
                         "CREATE INDEX  ON post (author); " +
                         "CREATE INDEX  ON post (forum); " +
-                        "CREATE INDEX  ON post (thread);";
+                        "CREATE INDEX  ON post (thread);" +
+                        "CREATE INDEX  on post (parent_id);";
 
 //        LOGGER.debug(sql +
 //                "create table success");

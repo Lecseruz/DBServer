@@ -22,7 +22,7 @@ public class ServiceController {
     public ServiceController(StatusJDBCTemplate statusJDBCTemplate) {
         this.statusJDBCTemplate = statusJDBCTemplate;
 //        statusJDBCTemplate.dropTable();
-//        statusJDBCTemplate.createTable();
+        statusJDBCTemplate.createTable();
     }
 
     @RequestMapping(value = "/clear", method = RequestMethod.POST)

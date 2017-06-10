@@ -28,7 +28,8 @@ public class VoiceJDBCTemplate {
                         "id SERIAL PRIMARY KEY, " +
                         "nickname CITEXT NOT NULL, " +
                         "count int NOT NULL," +
-                        "thread_id int NOT NULL); ";
+                        "thread_id int NOT NULL); " +
+                        "CREATE INDEX on voice (thread_id);";
 //        LOGGER.debug(query + "success");
 
         jdbcTemplate.execute(query);
