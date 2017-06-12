@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
  */
 public class ForumMapper implements RowMapper<Forum> {
     public Forum mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Forum forum = new Forum();
+        final Forum forum = new Forum();
         forum.setTitle(rs.getString("title"));
         forum.setSlug(rs.getString("slug"));
         forum.setThreads(rs.getInt("threads"));

@@ -5,6 +5,7 @@ import models.forum.Forum;
 import models.post.Post;
 import models.thread.Thread;
 import models.user.User;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by magomed on 08.05.17.
@@ -34,7 +35,7 @@ public class ResponseInfoPost {
         return post;
     }
 
-    public void setPost(Post post) {
+    public void setPost(@Nullable Post post) {
         this.post = post;
     }
 
@@ -50,7 +51,7 @@ public class ResponseInfoPost {
         return thread;
     }
 
-    public void setThread(Thread thread) {
+    public void setThread(@Nullable Thread thread) {
         this.thread = thread;
     }
 

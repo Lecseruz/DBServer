@@ -24,21 +24,8 @@ public class UserJDBCTemplate {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void createTable() {
-        String query =
-                "CREATE EXTENSION IF NOT EXISTS citext; " +
-                        "CREATE TABLE IF NOT EXISTS m_user ( " +
-                        "id SERIAL NOT NULL PRIMARY KEY," +
-                        "nickname CITEXT UNIQUE NOT NULL, " +
-                        "fullname VARCHAR(128) NOT NULL, " +
-                        "abbout TEXT NOT NULL, " +
-                        "email CITEXT UNIQUE NOT NULL); ";
-//        LOGGER.debug(query);
-        jdbcTemplate.execute(query);
-    }
-
-    public void dropTable() {
-        String query = "DROP TABLE IF EXISTS m_user";
+    public void clearTable() {
+        String query = "TRUNCATE TABLE m_user CASCADE ";
 
         jdbcTemplate.execute(query);
 //        LOGGER.debug("drop success");

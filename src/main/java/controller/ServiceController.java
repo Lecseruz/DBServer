@@ -21,14 +21,11 @@ public class ServiceController {
     @Autowired
     public ServiceController(StatusJDBCTemplate statusJDBCTemplate) {
         this.statusJDBCTemplate = statusJDBCTemplate;
-//        statusJDBCTemplate.dropTable();
-        statusJDBCTemplate.createTable();
     }
 
     @RequestMapping(value = "/clear", method = RequestMethod.POST)
     public ResponseEntity<?> clear() throws IOException {
-        statusJDBCTemplate.dropTable();
-        statusJDBCTemplate.createTable();
+        statusJDBCTemplate.clearTable();
         return ResponseEntity.ok(null);
     }
 

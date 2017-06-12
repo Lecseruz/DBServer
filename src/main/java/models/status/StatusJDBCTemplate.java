@@ -10,15 +10,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.logging.Logger;
-
 /**
  * Created by magomed on 20.03.17.
  */
 
 @Service
 @Transactional
-public class StatusJDBCTemplate implements StatusDAO {
+public class StatusJDBCTemplate {
     private final JdbcTemplate jdbcTemplate;
     private final UserJDBCTemplate userJDBCTemplate;
     private final ForumJDBCTemplate forumJDBCTemplate;
@@ -38,28 +36,17 @@ public class StatusJDBCTemplate implements StatusDAO {
         this.voiceJDBCTemplate = voiceJDBCTemplate;
     }
 
-    @Override
     public Status getStatus() {
         final Status status = new Status(userJDBCTemplate.getCount(), forumJDBCTemplate.getCount(),  threadJDBCTemplate.getCount(), postJDBCTemplate.getCount());
 //        LOGGER.debug("get status success");
         return status;
     }
 
-    @Override
-    public void createTable() {
-        userJDBCTemplate.createTable();
-        forumJDBCTemplate.createTable();
-        threadJDBCTemplate.createTable();
-        voiceJDBCTemplate.createTable();
-        postJDBCTemplate.createTable();
-    }
-
-    @Override
-    public void dropTable() {
-        postJDBCTemplate.dropTable();
-        forumJDBCTemplate.dropTable();
-        threadJDBCTemplate.dropTable();
-        userJDBCTemplate.dropTable();
-        voiceJDBCTemplate.dropTable();
+    public void clearTable() {
+        postJDBCTemplate.clearTable();
+        forumJDBCTemplate.clearTable();
+        threadJDBCTemplate.clearTable();
+        userJDBCTemplate.clearTable();
+        voiceJDBCTemplate.clearTable();
     }
 }

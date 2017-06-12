@@ -4,18 +4,18 @@ package models.voice;
  * Created by magomed on 26.04.17.
  */
 public class Voice {
-    private String nickname;
+    private String author;
 
     private int voice;
 
     private int thread_id;
 
-    public String getNickname() {
-        return nickname;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setNickname(String author) {
+        this.author = author;
     }
 
     public int getVoice() {
@@ -29,7 +29,7 @@ public class Voice {
     @Override
     public String toString() {
         return "Voice{" +
-                "nickname='" + nickname + '\'' +
+                "nickname='" + author + '\'' +
                 ", voice=" + voice +
                 '}';
     }
@@ -38,7 +38,7 @@ public class Voice {
         return thread_id;
     }
 
-    public void setThread_id(int thread_id) {
-        this.thread_id = thread_id;
+    public void setThread_id(int id) {
+        this.thread_id = id;
     }
 }

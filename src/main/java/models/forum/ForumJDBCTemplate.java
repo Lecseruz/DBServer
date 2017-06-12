@@ -1,19 +1,11 @@
 package models.forum;
 
-import models.user.User;
-import models.user.UserMapper;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class ForumJDBCTemplate {
-
-    private String marker = null;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -24,80 +16,28 @@ public class ForumJDBCTemplate {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
-    public void createTable() {
-        String sql =
-                "CREATE TABLE IF NOT EXISTS forum ( " +
-                        "title VARCHAR(128) NOT NULL, " +
-                        "admin CITEXT NOT NULL, " +
-                        "slug CITEXT UNIQUE NOT NULL, " +
-                        "posts BIGINT NOT NULL DEFAULT 0, " +
-                        "threads BIGINT NOT NULL DEFAULT 0, " +
-                        "FOREIGN KEY (admin) REFERENCES m_user(nickname))";
-//        LOGGER.debug(sql + "create table success");
-
-        jdbcTemplate.execute(sql);
-    }
-
-
     public void create(String title, String admin, String slug, int posts, int thread) {
-        String SQL = "INSERT INTO Forum (title, admin, slug, posts, threads) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(SQL, title, admin, slug, posts, thread);
+        final String sql = "INSERT INTO forum (title, admin, slug, posts, threads) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, title, admin, slug, posts, thread);
 //        LOGGER.debug("created" + title + " with user " + admin);
-        marker = slug;
     }
 
-    public void dropTable() {
-        String query = "DROP TABLE IF EXISTS forum CASCADE ";
-        jdbcTemplate.execute(query);
+    public void clearTable() {
+        final String sql = "TRUNCATE TABLE forum CASCADE ";
+        jdbcTemplate.execute(sql);
 //        LOGGER.debug("drop table success");
 
     }
 
-    public List<Forum> listForum() {
-        String SQL = "SELECT * FROM Forum";
-        List<Forum> forums = jdbcTemplate.query(SQL, new ForumMapper());
-//        LOGGER.debug("get list forum success");
-        return forums;
-    }
-
     public Forum getForumBySlug(String slug) {
-        String SQL = "SELECT * FROM Forum WHERE LOWER(slug) = LOWER(?)";
-        Forum forum = jdbcTemplate.queryForObject(SQL, new ForumMapper(), slug);
-//        LOGGER.debug("get froum by slug success");
-        return forum;
-    }
-
-    public Forum getForumByNicknameAndTitle(String admin, String title) {
-        String SQL = "SELECT * FROM forum WHERE LOWER(admin) = LOWER(?) AND LOWER(title) = LOWER(?)";
-        Forum forum = jdbcTemplate.queryForObject(SQL, new ForumMapper(), admin, title);
-//        LOGGER.debug("get forum success");
-        return forum;
+        final String sql = "SELECT * FROM Forum WHERE LOWER(slug) = LOWER(?)";
+        //        LOGGER.debug("get froum by slug success");
+        return jdbcTemplate.queryForObject(sql, new ForumMapper(), slug);
     }
 
     public int getCount() {
-        String SQL = "SELECT COUNT(*) FROM forum";
-        int count = jdbcTemplate.queryForObject(SQL, Integer.class);
-//        LOGGER.debug("get count success");
-        return count;
-    }
-
-
-    public void delete() {
-        String SQL = "DELETE FROM forum";
-        jdbcTemplate.update(SQL);
-//        LOGGER.debug("Deleted Record");
-    }
-
-    public void update(String title, String name, String slug, int posts, int threads) {
-
-    }
-
-    public String getMarker() {
-        return marker;
-    }
-
-    public void setMarker(String marker) {
-        this.marker = marker;
+        final String sql = "SELECT COUNT(*) FROM forum";
+        //        LOGGER.debug("get count success");
+        return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 }

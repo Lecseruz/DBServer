@@ -3,6 +3,7 @@ package models.ResponseObject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import models.post.Post;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class ResponsePosts {
         this.marker = marker;
     }
 
-    public void setPosts(List<Post> posts) {
+    public void setPosts(@Nullable List<Post> posts) {
         this.posts = posts;
     }
 }

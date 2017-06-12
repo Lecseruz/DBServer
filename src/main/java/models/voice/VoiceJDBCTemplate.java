@@ -1,6 +1,5 @@
 package models.voice;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,37 +20,23 @@ public class VoiceJDBCTemplate {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void createTable() {
-        String query =
-                "CREATE EXTENSION IF NOT EXISTS citext; " +
-                        "CREATE TABLE IF NOT EXISTS voice ( " +
-                        "id SERIAL PRIMARY KEY, " +
-                        "nickname CITEXT NOT NULL, " +
-                        "count int NOT NULL," +
-                        "thread_id int NOT NULL); " +
-                        "CREATE INDEX on voice (thread_id);";
-//        LOGGER.debug(query + "success");
-
-        jdbcTemplate.execute(query);
-    }
-
-    public void dropTable() {
-        String query = "DROP TABLE IF EXISTS voice";
+    public void clearTable() {
+        String query = "TRUNCATE TABLE voice CASCADE ";
         jdbcTemplate.execute(query);
 //        LOGGER.debug("drop table success");
     }
 
     public int createVoice(Voice voice) {
-        String SQL = "INSERT INTO voice (nickname, count, thread_id) VALUES(?,?,?) RETURNING id";
-        int id = jdbcTemplate.queryForObject(SQL, Integer.class, voice.getNickname(), voice.getVoice(), voice.getThread_id());
+        final String sql = "INSERT INTO voice (author, count, thread_id) VALUES(?,?,?) RETURNING id";
+        final int id = jdbcTemplate.queryForObject(sql, Integer.class, voice.getAuthor(), voice.getVoice(), voice.getThread_id());
 //        LOGGER.debug("create succes");
         return id;
     }
 
     public Voice getVoiceWithNicknameAndThread(String nickname, int thread_id) {
         try {
-            String SQL = "SELECT * FROM voice WHERE LOWER(nickname) = LOWER(?) AND thread_id = ?";
-            Voice voice = jdbcTemplate.queryForObject(SQL, new VoiceMapper(), nickname, thread_id);
+            final String sql = "SELECT * FROM voice WHERE LOWER(author) = LOWER(?) AND thread_id = ?";
+            final Voice voice = jdbcTemplate.queryForObject(sql, new VoiceMapper(), nickname, thread_id);
 //            LOGGER.debug("succes");
             return voice;
         }catch (EmptyResultDataAccessException e){
@@ -60,8 +45,8 @@ public class VoiceJDBCTemplate {
     }
 
     public void updateVoice(Voice voice) {
-        String SQL = "UPDATE voice SET count = ? WHERE LOWER(nickname) = LOWER(?) and thread_id = ?";
-        jdbcTemplate.update(SQL, voice.getVoice(), voice.getNickname(), voice.getThread_id());
+        String SQL = "UPDATE voice SET count = ? WHERE LOWER(author) = LOWER(?) and thread_id = ?";
+        jdbcTemplate.update(SQL, voice.getVoice(), voice.getAuthor(), voice.getThread_id());
 //        LOGGER.debug("update success");
     }
 }

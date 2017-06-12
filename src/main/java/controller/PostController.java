@@ -50,7 +50,7 @@ public class PostController {
                 final Post newPost = postJDBCTemplate.updatePost(postUpdate.getMessage(), post.getId());
 //                LOGGER.debug("post update success");
                 return ResponseEntity.ok(newPost);
-            } else{
+            } else {
 //                LOGGER.debug("post update success");
                 return ResponseEntity.ok(post);
             }
@@ -62,29 +62,24 @@ public class PostController {
 
     @RequestMapping(value = "/{id}/details", method = RequestMethod.GET)
     public ResponseEntity<?> getInfoPost(@PathVariable(value = "id") int id, @RequestParam(name = "related", required = false) Set<String> related) {
-        try {
-            final ResponseInfoPost responseInfoPost = new ResponseInfoPost();
-            responseInfoPost.setPost(postJDBCTemplate.getPostById(id));
-            if (responseInfoPost.getPost() == null){
+        final ResponseInfoPost responseInfoPost = new ResponseInfoPost();
+        responseInfoPost.setPost(postJDBCTemplate.getPostById(id));
+        if (responseInfoPost.getPost() == null) {
 //                LOGGER.debug("post not found");
-                return ResponseEntity.notFound().build();// TODO : bad
-            }
-            if (related != null) {
-                if (related.contains("user")) {
-                    responseInfoPost.setAuthor(userJDBCTemplate.getUserByNickname(responseInfoPost.getPost().getAuthor()));
-                }
-                if (related.contains("forum")) {
-                    responseInfoPost.setForum(forumJDBCTemplate.getForumBySlug(responseInfoPost.getPost().getForum()));
-                }
-                if (related.contains("thread")) {
-                    responseInfoPost.setThread(threadJDBCTemplate.getThreadById(responseInfoPost.getPost().getThread()));
-                }
-            }
-//            LOGGER.debug("information about post get success");
-            return ResponseEntity.ok(responseInfoPost);
-        } catch (EmptyResultDataAccessException e) {
-//            LOGGER.debug(e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build();// TODO : bad
         }
+        if (related != null) {
+            if (related.contains("user")) {
+                responseInfoPost.setAuthor(userJDBCTemplate.getUserByNickname(responseInfoPost.getPost().getAuthor()));
+            }
+            if (related.contains("forum")) {
+                responseInfoPost.setForum(forumJDBCTemplate.getForumBySlug(responseInfoPost.getPost().getForum()));
+            }
+            if (related.contains("thread")) {
+                responseInfoPost.setThread(threadJDBCTemplate.getThreadById(responseInfoPost.getPost().getThread()));
+            }
+        }
+//            LOGGER.debug("information about post get success");
+        return ResponseEntity.ok(responseInfoPost);
     }
 }

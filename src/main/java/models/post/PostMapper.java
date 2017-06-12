@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class PostMapper implements RowMapper<Post> {
     @Override
     public Post mapRow(ResultSet resultSet, int i) throws SQLException {
-        Post post = new Post();
+        final Post post = new Post();
         post.setAuthor(resultSet.getString("author"));
         post.setCreated(TimestampHelper.fromTimestamp(resultSet.getTimestamp("created")));
         post.setForum(resultSet.getString("forum"));

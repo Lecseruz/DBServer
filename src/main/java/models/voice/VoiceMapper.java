@@ -13,7 +13,7 @@ public class VoiceMapper implements RowMapper<Voice> {
     @Override
     public Voice mapRow(ResultSet resultSet, int i) throws SQLException {
         Voice voice = new Voice();
-        voice.setNickname(resultSet.getString("nickname"));
+        voice.setNickname(resultSet.getString("author"));
         voice.setVoice(resultSet.getInt("count"));
         voice.setThread_id(resultSet.getInt("thread_id"));
         return voice;
