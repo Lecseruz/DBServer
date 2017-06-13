@@ -1,14 +1,17 @@
 package models.voice;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Created by magomed on 26.04.17.
  */
 public class Voice {
+    @JsonProperty("nickaname")
     private String author;
 
     private int voice;
 
-    private int thread_id;
+    private int thread;
 
     public String getAuthor() {
         return author;
@@ -34,11 +37,11 @@ public class Voice {
                 '}';
     }
 
-    public int getThread_id() {
-        return thread_id;
+    public int getThread() {
+        return thread;
     }
 
-    public void setThread_id(int id) {
-        this.thread_id = id;
+    public void setThread(int id) {
+        this.thread = id;
     }
 }

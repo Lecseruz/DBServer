@@ -13,14 +13,14 @@ public class ThreadMapper implements RowMapper<Thread> {
 
     @Override
     public Thread mapRow(ResultSet resultSet, int i) throws SQLException {
-        String author = resultSet.getString("author");
-        String title = resultSet.getString("title");
-        String created = fromTimestamp(resultSet.getTimestamp("created"));
-        String forum = resultSet.getString("forum");
-        int id = resultSet.getInt("id");
-        String message = resultSet.getString("message");
-        String slug = resultSet.getString("slug");
-        int votes = resultSet.getInt("votes");
+        final String author = resultSet.getString("nickname");
+        final String title = resultSet.getString("title");
+        final String created = fromTimestamp(resultSet.getTimestamp("created"));
+        final String forum = resultSet.getString("forum_slug");
+        final int id = resultSet.getInt("id");
+        final String message = resultSet.getString("message");
+        final String slug = resultSet.getString("slug");
+        final int votes = resultSet.getInt("votes");
         return new Thread(id, title, author, forum, message, votes, slug, created);
     }
 }

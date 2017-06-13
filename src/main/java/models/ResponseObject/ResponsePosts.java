@@ -18,7 +18,7 @@ public class ResponsePosts {
     List<Post> posts;
 
     @JsonCreator
-    public ResponsePosts(@JsonProperty("marker") String marker, @JsonProperty("posts") List<Post> posts){
+    public ResponsePosts(@JsonProperty("marker") String marker, @Nullable @JsonProperty("posts") List<Post> posts){
         this.marker = marker;
         this.posts = posts;
     }

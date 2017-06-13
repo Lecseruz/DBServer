@@ -5,7 +5,6 @@ import models.user.User;
 import models.user.UserJDBCTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +34,7 @@ public class UserController {
             userJDBCTemplate.create(nickname, user.getFullname(), user.getAbout(), user.getEmail());
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } catch (DuplicateKeyException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(userJDBCTemplate.getUserByNicknameAndEmail(nickname, user.getEmail()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(userJDBCTemplate.getUsersByNicknameOrEmail(nickname, user.getEmail()));
         }
     }
 
@@ -53,20 +52,12 @@ public class UserController {
     public ResponseEntity<?> updateUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
         user.setNickname(nickname);
         try {
-            if (userJDBCTemplate.getUserByNickname(nickname) == null){
-                return ResponseEntity.notFound().build();
-            }
-            if (user.getFullname() != null){
-                userJDBCTemplate.updateFullname(user.getFullname(), nickname);
-            }
-            if (user.getAbout() != null){
-                userJDBCTemplate.updateAbbout(user.getAbout(), nickname);
-            }
-            if (user.getEmail() != null){
-                userJDBCTemplate.updateEmail(user.getEmail(), nickname);
-            }
+            user = userJDBCTemplate.update(user.getAbout(), user.getEmail(), user.getFullname(), nickname);
         }catch (DuplicateKeyException d){
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         return ResponseEntity.ok(userJDBCTemplate.getUserByNickname(nickname));
     }

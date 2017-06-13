@@ -31,19 +31,33 @@ public class ThreadJDBCTemplate {
 
     }
 
+    public @Nullable Thread getThreadBySlugOrId(String slug){
+        try {
+             return getThreadById(Integer.parseInt(slug));
+        } catch (NumberFormatException ignored) {
+            return getThreadBySlug(slug);
+        }
+    }
+
     public void create(Thread thread) {
         String sql;
         final int id;
         if (thread.getCreated() != null) {
-            sql = "INSERT INTO Thread ( title, author, forum, message, votes, slug, created) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
-            id = jdbcTemplate.queryForObject(sql, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getVotes(), thread.getSlug(), TimestampHelper.toTimestamp(thread.getCreated()));
+            sql = "INSERT INTO Thread ( title, user_id, forum_id, message, slug, created) VALUES (?," +
+                    " (SELECT id FROM m_user WHERE LOWER(nickname) = lower(?))," +
+                    " (SELECT id FROM forum f WHERE LOWER(f.slug) = LOWER(?))," +
+                    " ?, ?, ?) RETURNING id";
+            id = jdbcTemplate.queryForObject(sql, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getSlug(), TimestampHelper.toTimestamp(thread.getCreated()));
         } else {
-            sql = "INSERT INTO Thread ( title, author, forum, message, votes, slug) VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
-            id = jdbcTemplate.queryForObject(sql, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getVotes(), thread.getSlug());
+            sql = "INSERT INTO Thread ( title, user_id, forum_id, message, slug) VALUES (?," +
+                    " (SELECT id FROM m_user m WHERE LOWER(m.nickname) = lower(?))," +
+                    " (SELECT id FROM forum f WHERE LOWER(f.slug) = LOWER(?))," +
+                    " ?,  ?) RETURNING id";
+            id = jdbcTemplate.queryForObject(sql, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getSlug());
         }
         sql =
                 "UPDATE forum SET threads = threads + 1 " +
-                        "WHERE slug = ? ;";
+                        "WHERE LOWER(slug) = LOWER(?) ;";
         jdbcTemplate.update(sql, thread.getForum());
 //        LOGGER.debug("created" + thread.getTitle() + " with user ");
         thread.setId(id);
@@ -61,7 +75,7 @@ public class ThreadJDBCTemplate {
                 }
                 sql += "message = '" + threadUpdate.getMessage() + "' ";
             }
-            sql += "WHERE lower(slug) = lower(?)";
+            sql += "WHERE LOWER(slug) = LOWER(?)";
             jdbcTemplate.update(sql, slug);
         }
 //        LOGGER.debug("updateThread success");
@@ -70,7 +84,10 @@ public class ThreadJDBCTemplate {
 
     public @Nullable Thread getThreadById(int id) {
         try {
-            final String sql = "SELECT * FROM thread WHERE id = ?";
+            final String sql = "SELECT t.*, m.nickname, f.slug AS forum_slug FROM thread t " +
+                    " JOIN forum f ON t.forum_id = f.id" +
+                    " JOIN m_user m ON (m.id = t.user_id)" +
+                    " WHERE t.id = ?";
             //            LOGGER.debug("getThreadById success");
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, new ThreadMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -81,7 +98,10 @@ public class ThreadJDBCTemplate {
 
     public @Nullable Thread getThreadBySlug(String slug) {
         try {
-            final String sql = "SELECT * FROM thread WHERE lower(slug) = lower(?)";
+            final String sql = "SELECT t.*, m.nickname, f.slug AS forum_slug FROM thread t " +
+                    " JOIN forum f ON t.forum_id = f.id " +
+                    " JOIN m_user m ON (m.id = t.user_id)" +
+                    " WHERE LOWER(t.slug) = LOWER(?)";
             //            LOGGER.debug("getThreadById success");
             return jdbcTemplate.queryForObject(sql, new Object[]{slug}, new ThreadMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -90,8 +110,10 @@ public class ThreadJDBCTemplate {
         }
     }
 
-    public List<Thread> getThreads(String slug, boolean desc, int limit, String timestamp) {
-        String sql = "select * from thread where LOWER(forum) = LOWER(?)";
+    public List<Thread> getThreads(int id, boolean desc, int limit, String timestamp) {
+        String sql = "select m.nickname, t.*, f.slug AS forum_slug from thread t" +
+                " JOIN forum f ON (t.forum_id = f.id AND f.id = ?) " +
+                " JOIN m_user m ON (m.id = t.user_id) ";
         if (!timestamp.isEmpty()) {
             if (desc) {
                 sql += "AND created <= ?";
@@ -109,9 +131,9 @@ public class ThreadJDBCTemplate {
         }
         final List<Thread> threads;
         if (!timestamp.isEmpty()) {
-            threads = jdbcTemplate.query(sql, new ThreadMapper(), slug, TimestampHelper.toTimestamp(timestamp));
+            threads = jdbcTemplate.query(sql, new ThreadMapper(), id, TimestampHelper.toTimestamp(timestamp));
         } else {
-            threads = jdbcTemplate.query(sql, new ThreadMapper(), slug);
+            threads = jdbcTemplate.query(sql, new ThreadMapper(), id);
         }
 //        LOGGER.debug("getThreads success");
         return threads;
@@ -123,9 +145,4 @@ public class ThreadJDBCTemplate {
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
-    public int updateVoiceById(int id, int count) {
-        final String sql = "UPDATE thread SET votes = ? WHERE id = ? RETURNING votes";
-        //        LOGGER.debug("updateVoiceById success");
-        return jdbcTemplate.queryForObject(sql, Integer.class, count, id);
-    }
 }

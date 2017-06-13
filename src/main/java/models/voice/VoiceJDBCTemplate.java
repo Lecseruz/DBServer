@@ -1,7 +1,6 @@
 package models.voice;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,32 +20,26 @@ public class VoiceJDBCTemplate {
     }
 
     public void clearTable() {
-        String query = "TRUNCATE TABLE voice CASCADE ";
+        final String query = "TRUNCATE TABLE voice CASCADE ";
         jdbcTemplate.execute(query);
 //        LOGGER.debug("drop table success");
     }
 
-    public int createVoice(Voice voice) {
-        final String sql = "INSERT INTO voice (author, count, thread_id) VALUES(?,?,?) RETURNING id";
-        final int id = jdbcTemplate.queryForObject(sql, Integer.class, voice.getAuthor(), voice.getVoice(), voice.getThread_id());
-//        LOGGER.debug("create succes");
-        return id;
-    }
-
-    public Voice getVoiceWithNicknameAndThread(String nickname, int thread_id) {
-        try {
-            final String sql = "SELECT * FROM voice WHERE LOWER(author) = LOWER(?) AND thread_id = ?";
-            final Voice voice = jdbcTemplate.queryForObject(sql, new VoiceMapper(), nickname, thread_id);
-//            LOGGER.debug("succes");
-            return voice;
-        }catch (EmptyResultDataAccessException e){
-            return null;
+    public int addVote(Voice vote) {
+        final int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM voice WHERE user_id " +
+                "IN (SELECT id FROM m_user WHERE LOWER(nickname) = LOWER(?)) AND thread_id = ?",
+                Integer.class, vote.getAuthor(), vote.getThread());
+        if (count == 0) {
+            final String sql = "INSERT INTO voice (user_id, count, thread_id) VALUES (" +
+                    "(SELECT id FROM m_user m WHERE LOWER(m.nickname) = LOWER(?)), ?, ?)";
+            jdbcTemplate.update(sql, vote.getAuthor(), vote.getVoice(), vote.getThread());
+        } else {
+            final String sql = "UPDATE voice SET count = ? " +
+                    "WHERE user_id IN (SELECT id FROM m_user WHERE LOWER(nickname) = LOWER(?)) AND thread_id = ?";
+            jdbcTemplate.update(sql, vote.getVoice(), vote.getAuthor(), vote.getThread());
         }
-    }
-
-    public void updateVoice(Voice voice) {
-        String SQL = "UPDATE voice SET count = ? WHERE LOWER(author) = LOWER(?) and thread_id = ?";
-        jdbcTemplate.update(SQL, voice.getVoice(), voice.getAuthor(), voice.getThread_id());
-//        LOGGER.debug("update success");
+        final String sql = "UPDATE thread  SET votes = (SELECT SUM(count) as votes FROM voice " +
+                "WHERE (thread_id) = ?) WHERE id = ? RETURNING votes";
+        return jdbcTemplate.queryForObject(sql , Integer.class, vote.getThread(), vote.getThread());
     }
 }

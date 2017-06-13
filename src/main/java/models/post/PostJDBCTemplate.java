@@ -40,7 +40,9 @@ public class PostJDBCTemplate {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        String sql = "INSERT INTO post (id, parent_id, author, message, isEdited, forum, thread, created, path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, array_append((SELECT path FROM post WHERE id = ?), ?))";
+        String sql = "INSERT INTO post (id, parent_id, user_id, message, isEdited, forum_id, thread, created, path) VALUES (?, ?, " +
+                "(SELECT id FROM m_user m WHERE LOWER(m.nickname) = LOWER(?)), ?, ?, " +
+                "(SELECT id FROM forum WHERE LOWER(slug) = LOWER(?)), ?, ?, array_append((SELECT path FROM post WHERE id = ?), ?))";
         try (Connection conn = jdbcTemplate.getDataSource().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql, Statement.NO_GENERATED_KEYS)) {
             for (Post post : posts) {
@@ -60,8 +62,8 @@ public class PostJDBCTemplate {
 //                LOGGER.info("Post with id \"{}\" created", post.getId());
             }
             pst.executeBatch();
-            sql  = "UPDATE forum SET posts = posts + ? " +
-                            "WHERE slug = ? ;";
+            sql = "UPDATE forum SET posts = posts + ? " +
+                    "WHERE slug = ? ;";
             jdbcTemplate.update(sql, posts.size(), posts.get(0).getForum());
             //        LOGGER.debug("create posts with user ");
         } catch (SQLException e) {
@@ -76,44 +78,53 @@ public class PostJDBCTemplate {
     }
 
     public List<Post> flatSort(int id, int limit, int offset, boolean desc) {
-        final String sql = "SELECT * FROM post WHERE thread = ?" +
-          "ORDER BY created " + (desc ? "DESC" : "ASC") + ", id " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
+        final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
+                " JOIN forum f ON (p.forum_id = f.id)" +
+                " JOIN m_user m ON (m.id = p.user_id)" +
+                " WHERE p.thread = ?" +
+                "ORDER BY p.created " + (desc ? "DESC" : "ASC") + ", p.id " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
 
         //        LOGGER.debug("get posts success");
         return jdbcTemplate.query(sql, new PostMapper(), id, limit, offset);
     }
 
     public List<Post> treeSort(int id, int limit, int offset, boolean desc) {
-        final String sql =
-                "SELECT * FROM post " +
-                "WHERE thread = ?  " +
-                "ORDER BY path " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
+        final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
+                " JOIN forum f ON (p.forum_id = f.id)" +
+                " JOIN m_user m ON (m.id = p.user_id)" +
+                "WHERE p.thread = ?  " +
+                "ORDER BY p.path " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
         //        LOGGER.debug("get posts success");
         return jdbcTemplate.query(sql, new PostMapper(), id, limit, offset);
     }
 
     public List<Post> parentTreeSort(int id, Boolean desc, List<Integer> parents) {
-        final String sql = "SELECT * FROM post " +
-                "WHERE thread = ? " + " AND path[1] = ? " +
-                "ORDER BY path " + (desc ? "DESC" : "ASC") + ", id " + (desc ? "DESC" : "ASC");
+        final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
+                " JOIN forum f ON (p.forum_id = f.id)" +
+                " JOIN m_user m ON (m.id = p.user_id)"  +
+                "WHERE p.thread = ? " + " AND p.path[1] = ? " +
+                "ORDER BY p.path " + (desc ? "DESC" : "ASC") + ", p.id " + (desc ? "DESC" : "ASC");
         final List<Post> posts = new ArrayList<>();
-        for(Integer parent : parents){
+        for (Integer parent : parents) {
             posts.addAll(jdbcTemplate.query(sql, new PostMapper(), id, parent));
         }
 //        LOGGER.debug("parentTree success");
         return posts;
     }
 
-    public List<Integer> getParents(int id, int offset, int limit, boolean desc){
+    public List<Integer> getParents(int id, int offset, int limit, boolean desc) {
         final String sql = "SELECT id FROM post WHERE parent_id = 0 and  thread = ? " +
                 "ORDER BY id " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ? ";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("id"), id , limit, offset);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("id"), id, limit, offset);
     }
 
     public @Nullable Post getPostById(int id) {
         try {
             //            LOGGER.debug("get post by id success");
-            final String sql = "SELECT * FROM post WHERE id = ?";
+            final String sql = "SELECT p.*, m.nickname, f.slug AS forum_slug FROM post p " +
+                    " JOIN forum f ON (p.forum_id = f.id)" +
+                    " JOIN m_user m ON (m.id = p.user_id)" +
+                    " WHERE p.id = ?";
             return jdbcTemplate.queryForObject(sql, new PostMapper(), id);
         } catch (EmptyResultDataAccessException e) {
             System.out.println(e.getMessage());

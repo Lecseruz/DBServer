@@ -7,7 +7,6 @@ import models.post.PostJDBCTemplate;
 import models.post.PostUpdate;
 import models.thread.ThreadJDBCTemplate;
 import models.user.UserJDBCTemplate;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;

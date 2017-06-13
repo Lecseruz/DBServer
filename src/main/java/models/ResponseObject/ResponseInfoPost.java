@@ -43,7 +43,7 @@ public class ResponseInfoPost {
         return author;
     }
 
-    public void setAuthor(User author) {
+    public void setAuthor(@Nullable User author) {
         this.author = author;
     }
 

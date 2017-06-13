@@ -4,11 +4,20 @@ package models.forum;
  * Created by magomed on 12.03.17.
  */
 public class Forum {
+    int id;
     private String title;
     private String user;
     private String slug;
     private int posts;
     private int threads;
+
+    public int getId(){
+        return id;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
 
     public int getThreads() {
         return threads;
@@ -42,9 +51,6 @@ public class Forum {
         return posts;
     }
 
-    public void print(){
-        System.out.print(title + user + slug + posts + threads);
-    }
     public void setPosts(int posts) {
         this.posts = posts;
     }

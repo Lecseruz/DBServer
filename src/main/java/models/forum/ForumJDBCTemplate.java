@@ -16,9 +16,9 @@ public class ForumJDBCTemplate {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void create(String title, String admin, String slug, int posts, int thread) {
-        final String sql = "INSERT INTO forum (title, admin, slug, posts, threads) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, title, admin, slug, posts, thread);
+    public void create(String title, String admin, String slug) {
+        final String sql = "INSERT INTO forum (title, slug, user_id) VALUES (?, ?, (select id from m_user WHERE LOWER(nickname) = LOWER(?)))";
+        jdbcTemplate.update(sql, title, slug, admin);
 //        LOGGER.debug("created" + title + " with user " + admin);
     }
 
@@ -30,7 +30,7 @@ public class ForumJDBCTemplate {
     }
 
     public Forum getForumBySlug(String slug) {
-        final String sql = "SELECT * FROM Forum WHERE LOWER(slug) = LOWER(?)";
+        final String sql = "SELECT * FROM Forum f JOIN m_user m ON f.user_id = m.id WHERE LOWER(slug) = LOWER(?)";
         //        LOGGER.debug("get froum by slug success");
         return jdbcTemplate.queryForObject(sql, new ForumMapper(), slug);
     }
