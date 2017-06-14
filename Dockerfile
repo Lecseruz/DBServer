@@ -31,7 +31,7 @@ RUN echo "listen_addresses='*'" >> /etc/postgresql/$PGVER/main/postgresql.conf
 # Expose the PostgreSQL port
 EXPOSE 5432
 
-# Add VOLUMEs to allow backup of config, logs and databases
+# Add VOLUMEs to allow backup of application.config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
 # Back to the root author
@@ -45,16 +45,22 @@ USER root
 
 RUN apt-get update
 RUN apt-get install -y openjdk-8-jdk-headless
-RUN apt-get update
+
 RUN apt-get install -y maven
 
-ENV WORK /opt/DBServer
-ADD ./ $WORK/
+# Копируем исходный код в Docker-контейнер
+
+ENV WORK /opt/BDServer
+ADD src/ $WORK/src/
+ADD pom.xml $WORK/
+
+# Собираем и устанавливаем пакет
 
 WORKDIR $WORK
-
+# RUN rm -rf target/
 RUN mvn package
 
+# Объявлем порт сервера
 EXPOSE 5000
 
-CMD service postgresql start && java -jar target/BDServer-1.0-SNAPSHOT.jar
+CMD service postgresql start && java -jar target/BDServer-1.0-SNAPSHOT.jar application.Application --database=jdbc:postgresql://localhost5432/docker --username=docker --password=docker
