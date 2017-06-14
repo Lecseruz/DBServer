@@ -85,7 +85,7 @@ public class ThreadJDBCTemplate {
     public @Nullable Thread getThreadById(int id) {
         try {
             final String sql = "SELECT t.*, m.nickname, f.slug AS forum_slug FROM thread t " +
-                    " JOIN forum f ON t.forum_id = f.id" +
+                    " JOIN forum f ON (t.forum_id = f.id)" +
                     " JOIN m_user m ON (m.id = t.user_id)" +
                     " WHERE t.id = ?";
             //            LOGGER.debug("getThreadById success");
@@ -99,7 +99,7 @@ public class ThreadJDBCTemplate {
     public @Nullable Thread getThreadBySlug(String slug) {
         try {
             final String sql = "SELECT t.*, m.nickname, f.slug AS forum_slug FROM thread t " +
-                    " JOIN forum f ON t.forum_id = f.id " +
+                    " JOIN forum f ON (t.forum_id = f.id) " +
                     " JOIN m_user m ON (m.id = t.user_id)" +
                     " WHERE LOWER(t.slug) = LOWER(?)";
             //            LOGGER.debug("getThreadById success");

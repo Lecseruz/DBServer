@@ -90,8 +90,8 @@ public class PostJDBCTemplate {
 
     public List<Post> treeSort(int id, int limit, int offset, boolean desc) {
         final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
-                " JOIN forum f ON (p.forum_id = f.id)" +
                 " JOIN m_user m ON (m.id = p.user_id)" +
+                " JOIN forum f ON (p.forum_id = f.id)" +
                 "WHERE p.thread = ?  " +
                 "ORDER BY p.path " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
         //        LOGGER.debug("get posts success");
@@ -100,13 +100,13 @@ public class PostJDBCTemplate {
 
     public List<Post> parentTreeSort(int id, Boolean desc, List<Integer> parents) {
         final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
-                " JOIN forum f ON (p.forum_id = f.id)" +
                 " JOIN m_user m ON (m.id = p.user_id)"  +
-                "WHERE p.thread = ? " + " AND p.path[1] = ? " +
+                " JOIN forum f ON (p.forum_id = f.id)" +
+                "WHERE p.path[1] = ? AND p.thread = ? " +
                 "ORDER BY p.path " + (desc ? "DESC" : "ASC") + ", p.id " + (desc ? "DESC" : "ASC");
         final List<Post> posts = new ArrayList<>();
         for (Integer parent : parents) {
-            posts.addAll(jdbcTemplate.query(sql, new PostMapper(), id, parent));
+            posts.addAll(jdbcTemplate.query(sql, new PostMapper(), parent, id));
         }
 //        LOGGER.debug("parentTree success");
         return posts;

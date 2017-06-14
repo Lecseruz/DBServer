@@ -112,3 +112,8 @@ FOR EACH ROW EXECUTE PROCEDURE m_users_forums_add();
 
 CREATE TRIGGER thread_insert_trigger AFTER INSERT ON thread
 FOR EACH ROW EXECUTE PROCEDURE m_users_forums_add();
+
+CREATE TABLE IF NOT EXISTS maga (
+  id serial primary key,
+  mag text
+);
