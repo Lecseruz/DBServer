@@ -67,7 +67,6 @@ public class ThreadController {
     @RequestMapping(value = "/{slug_or_id}/vote", method = RequestMethod.POST)
     public ResponseEntity<?> createVoice(@PathVariable(value = "slug_or_id") String slug, @RequestBody Voice voice) throws IOException {
         final Thread thread = threadJDBCTemplate.getThreadBySlugOrId(slug);
-
         final User user = userJDBCTemplate.getUserByNickname(voice.getAuthor());
         if (thread == null || user == null) {
             return ResponseEntity.notFound().build();

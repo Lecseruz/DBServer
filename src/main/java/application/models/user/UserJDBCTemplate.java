@@ -37,7 +37,7 @@ public class UserJDBCTemplate {
 
     public @Nullable User getUserByNickname(String nickname) {
         try {
-            final String sql = "SELECT * FROM m_user WHERE LOWER(nickname) = LOWER(?)";
+            final String sql = "SELECT * FROM m_user WHERE LOWER (nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\")";
             //            LOGGER.debug("getUserByNickname success");
             return jdbcTemplate.queryForObject(sql, new UserMapper(), nickname);
         } catch (EmptyResultDataAccessException e){
@@ -47,7 +47,7 @@ public class UserJDBCTemplate {
 
     public @Nullable List<User> getUsersByNicknameOrEmail(String nickname, String email) {
         try {
-            final String sql = "SELECT * FROM m_user WHERE LOWER(nickname) = LOWER(?) OR LOWER(email) = LOWER(?)";
+            final String sql = "SELECT * FROM m_user WHERE LOWER(nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\") OR LOWER(email) = LOWER(?)";
             //            LOGGER.debug("getUserByNickname success");
             return jdbcTemplate.query(sql, new UserMapper(), nickname, email);
         } catch (EmptyResultDataAccessException e){

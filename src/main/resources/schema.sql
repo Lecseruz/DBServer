@@ -1,10 +1,12 @@
+
 DROP TABLE IF EXISTS post CASCADE ;
 DROP TABLE IF EXISTS forum CASCADE ;
 DROP TABLE IF EXISTS thread CASCADE ;
 DROP TABLE IF EXISTS m_user CASCADE ;
 DROP TABLE IF EXISTS voice;
-DROP TABLE IF EXISTS users_forum CASCADE ;
+DROP TABLE IF EXISTS m_users_forums CASCADE ;
 
+DROP INDEX IF EXISTS voice_thread_id;
 DROP INDEX if EXISTS unique_email;
 DROP INDEX IF EXISTS unique_slug_thread;
 DROP INDEX IF EXISTS unique_slug_forum;
@@ -22,25 +24,21 @@ DROP INDEX IF EXISTS post_parent_thread;
 DROP INDEX IF EXISTS post_parent;
 DROP INDEX IF EXISTS post_id_thread_id;
 
-DROP EXTENSION IF EXISTS citext;
-
-CREATE EXTENSION IF NOT EXISTS citext;
-
 CREATE TABLE IF NOT EXISTS m_user (
   id       SERIAL        NOT NULL PRIMARY KEY,
-  nickname CITEXT NOT NULL,
-  fullname VARCHAR(128),
+  nickname VARCHAR(100) NOT NULL,
+  fullname VARCHAR(100),
   abbout   TEXT,
-  email    VARCHAR(50) NOT NULL
+  email    VARCHAR(100)  NOT NULL
 );
 
-CREATE UNIQUE INDEX unique_email ON m_user (LOWER(email));
+CREATE UNIQUE INDEX unique_email ON m_user(LOWER(email));
 CREATE UNIQUE INDEX unique_nickname ON m_user (LOWER(nickname COLLATE "ucs_basic"));
 
 CREATE TABLE IF NOT EXISTS forum (
-  id      SERIAL PRIMARY KEY,
-  title   VARCHAR(128)  NOT NULL,
-  slug    CITEXT UNIQUE NOT NULL,
+  id      SERIAL NOT NULL PRIMARY KEY,
+  title   VARCHAR(100)  NOT NULL,
+  slug    VARCHAR(100),
   posts   BIGINT        NOT NULL DEFAULT 0,
   threads BIGINT        NOT NULL DEFAULT 0,
   user_id INT REFERENCES m_user(id) NOT NULL
@@ -58,7 +56,7 @@ CREATE TABLE IF NOT EXISTS thread (
   forum_id INT REFERENCES forum(id) NOT NULL,
   message TEXT         NOT NULL,
   votes   BIGINT       NOT NULL DEFAULT 0,
-  slug    CITEXT UNIQUE,
+  slug    VARCHAR(128),
   created TIMESTAMP    NOT NULL DEFAULT current_timestamp
 );
 

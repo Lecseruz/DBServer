@@ -41,8 +41,8 @@ public class PostJDBCTemplate {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         String sql = "INSERT INTO post (id, parent_id, user_id, message, isEdited, forum_id, thread, created, path) VALUES (?, ?, " +
-                "(SELECT id FROM m_user m WHERE LOWER(m.nickname) = LOWER(?)), ?, ?, " +
-                "(SELECT id FROM forum WHERE LOWER(slug) = LOWER(?)), ?, ?, array_append((SELECT path FROM post WHERE id = ?), ?))";
+                "(SELECT id FROM m_user m WHERE LOWER(m.nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\")), ?, ?, " +
+                "(SELECT id FROM forum f WHERE LOWER(f.slug) = LOWER(?)), ?, ?, array_append((SELECT path FROM post WHERE id = ?), ?))";
         try (Connection conn = jdbcTemplate.getDataSource().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql, Statement.NO_GENERATED_KEYS)) {
             for (Post post : posts) {
@@ -63,7 +63,7 @@ public class PostJDBCTemplate {
             }
             pst.executeBatch();
             sql = "UPDATE forum SET posts = posts + ? " +
-                    "WHERE slug = ? ;";
+                    "WHERE LOWER(slug) = LOWER(?);";
             jdbcTemplate.update(sql, posts.size(), posts.get(0).getForum());
             //        LOGGER.debug("create posts with user ");
         } catch (SQLException e) {

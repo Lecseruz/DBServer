@@ -30,7 +30,7 @@ public class ForumJDBCTemplate {
     }
 
     public Forum getForumBySlug(String slug) {
-        final String sql = "SELECT * FROM Forum f JOIN m_user m ON f.user_id = m.id WHERE LOWER(slug) = LOWER(?)";
+        final String sql = "SELECT * FROM Forum f JOIN m_user m ON f.user_id = m.id WHERE LOWER(f.slug) = LOWER(?)";
         //        LOGGER.debug("get froum by slug success");
         return jdbcTemplate.queryForObject(sql, new ForumMapper(), slug);
     }

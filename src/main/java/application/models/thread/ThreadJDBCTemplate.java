@@ -32,9 +32,9 @@ public class ThreadJDBCTemplate {
     }
 
     public @Nullable Thread getThreadBySlugOrId(String slug){
-        try {
-             return getThreadById(Integer.parseInt(slug));
-        } catch (NumberFormatException ignored) {
+        if (slug.matches("[-+]?\\d*\\.?\\d+")) {
+            return getThreadById(Integer.parseInt(slug));
+        } else {
             return getThreadBySlug(slug);
         }
     }
@@ -44,13 +44,13 @@ public class ThreadJDBCTemplate {
         final int id;
         if (thread.getCreated() != null) {
             sql = "INSERT INTO Thread ( title, user_id, forum_id, message, slug, created) VALUES (?," +
-                    " (SELECT id FROM m_user WHERE LOWER(nickname) = lower(?))," +
+                    " (SELECT id FROM m_user m WHERE LOWER(m.nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\"))," +
                     " (SELECT id FROM forum f WHERE LOWER(f.slug) = LOWER(?))," +
                     " ?, ?, ?) RETURNING id";
             id = jdbcTemplate.queryForObject(sql, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getSlug(), TimestampHelper.toTimestamp(thread.getCreated()));
         } else {
             sql = "INSERT INTO Thread ( title, user_id, forum_id, message, slug) VALUES (?," +
-                    " (SELECT id FROM m_user m WHERE LOWER(m.nickname) = lower(?))," +
+                    " (SELECT id FROM m_user m WHERE LOWER(m.nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\"))," +
                     " (SELECT id FROM forum f WHERE LOWER(f.slug) = LOWER(?))," +
                     " ?,  ?) RETURNING id";
             id = jdbcTemplate.queryForObject(sql, Integer.class, thread.getTitle(), thread.getAuthor(), thread.getForum(), thread.getMessage(), thread.getSlug());
