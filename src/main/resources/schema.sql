@@ -22,7 +22,7 @@ DROP INDEX IF EXISTS post_parent_thread;
 DROP INDEX IF EXISTS post_parent;
 DROP INDEX IF EXISTS post_id_thread_id;
 
-DROP EXTENSION IF EXIgitSTS citext;
+DROP EXTENSION IF EXISTS citext;
 
 CREATE EXTENSION IF NOT EXISTS citext;
 
