@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 public class VoiceJDBCTemplate {
     private JdbcTemplate jdbcTemplate;
 
-//    private static final Logger LOGGER = Logger.getLogger(VoiceJDBCTemplate.class);
-
     @Autowired
     public VoiceJDBCTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -22,7 +20,6 @@ public class VoiceJDBCTemplate {
     public void clearTable() {
         final String query = "TRUNCATE TABLE voice CASCADE ";
         jdbcTemplate.execute(query);
-//        LOGGER.debug("drop table success");
     }
 
     public int addVote(Voice vote) {

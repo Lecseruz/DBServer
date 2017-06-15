@@ -24,7 +24,6 @@ public class ForumController {
     private final UserJDBCTemplate userJDBCTemplate;
     private final ThreadJDBCTemplate threadJDBCTemplate;
 
-//    private static final Logger LOGGER = Logger.getLogger("ForumController");
 
 
     @Autowired
@@ -43,10 +42,8 @@ public class ForumController {
             }
             forum.setUser(user.getNickname());
             forumJDBCTemplate.create(forum.getTitle(), forum.getUser(), forum.getSlug());
-//            LOGGER.debug("forum created success");
             return ResponseEntity.status(HttpStatus.CREATED).body(forum);
         } catch (DuplicateKeyException e) {
-//            LOGGER.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(forumJDBCTemplate.getForumBySlug(forum.getSlug()));
         }
     }
@@ -57,7 +54,6 @@ public class ForumController {
             final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
             return ResponseEntity.ok(forum);
         } catch (EmptyResultDataAccessException e) {
-//            LOGGER.debug(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -71,13 +67,10 @@ public class ForumController {
             final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
             thread.setForum(forum.getSlug());
             threadJDBCTemplate.create(thread);
-//            LOGGER.debug("thread create success");
             return ResponseEntity.status(HttpStatus.CREATED).body(thread);
         } catch (EmptyResultDataAccessException | NullPointerException e) {
-//            LOGGER.debug(e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (DuplicateKeyException e) {
-//            LOGGER.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(threadJDBCTemplate.getThreadBySlug(thread.getSlug()));
         }
     }
@@ -87,10 +80,8 @@ public class ForumController {
         try {
             final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
             final List<Thread> threads = threadJDBCTemplate.getThreads(forum.getId(), desc, limit, created);
-//        LOGGER.debug("get threads success");
             return ResponseEntity.ok(threads);
         } catch (EmptyResultDataAccessException e) {
-//            LOGGER.debug(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -100,10 +91,8 @@ public class ForumController {
         try {
             final Forum forum = forumJDBCTemplate.getForumBySlug(slug);
             final List<User> users = userJDBCTemplate.getByForum(forum.getId(), limit, since, desc);
-//        LOGGER.debug("get Forum success");
             return ResponseEntity.ok(users);
         } catch (EmptyResultDataAccessException e) {
-//            LOGGER.debug(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

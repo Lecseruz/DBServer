@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class UserJDBCTemplate {
 
     private final JdbcTemplate jdbcTemplate;
-//    private static final Logger LOGGER = Logger.getLogger(UserJDBCTemplate.class);
 
     @Autowired
     public UserJDBCTemplate(JdbcTemplate jdbcTemplate) {
@@ -25,20 +24,16 @@ public class UserJDBCTemplate {
         final String sql = "TRUNCATE TABLE m_user CASCADE ";
 
         jdbcTemplate.execute(sql);
-//        LOGGER.debug("drop success");
-
     }
 
     public void create(String nickname, String fullname, String abbout, String email) {
         final String sql = "INSERT INTO m_user(nickname, fullname, abbout, email) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, nickname, fullname, abbout, email);
-//        LOGGER.debug("insert success");
     }
 
     public @Nullable User getUserByNickname(String nickname) {
         try {
             final String sql = "SELECT * FROM m_user WHERE LOWER (nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\")";
-            //            LOGGER.debug("getUserByNickname success");
             return jdbcTemplate.queryForObject(sql, new UserMapper(), nickname);
         } catch (EmptyResultDataAccessException e){
             return null;
@@ -48,7 +43,6 @@ public class UserJDBCTemplate {
     public @Nullable List<User> getUsersByNicknameOrEmail(String nickname, String email) {
         try {
             final String sql = "SELECT * FROM m_user WHERE LOWER(nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\") OR LOWER(email) = LOWER(?)";
-            //            LOGGER.debug("getUserByNickname success");
             return jdbcTemplate.query(sql, new UserMapper(), nickname, email);
         } catch (EmptyResultDataAccessException e){
             return null;
@@ -75,7 +69,6 @@ public class UserJDBCTemplate {
         if (limit != 0) {
             sql += "LIMIT " + limit + " ;";
         }
-        //        LOGGER.debug("getUsers success");
         return jdbcTemplate.query(sql, new UserMapper(), id);
     }
 
@@ -94,7 +87,6 @@ public class UserJDBCTemplate {
 
     public int getCount() {
         final String sql = "SELECT COUNT(*) FROM M_user";
-        //        LOGGER.debug("getVoiceWithNickname success");
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 

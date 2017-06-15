@@ -29,7 +29,6 @@ public class ThreadController {
     private final PostJDBCTemplate postJDBCTemplate;
     private final VoiceJDBCTemplate voiceJDBCTemplate;
     private final UserJDBCTemplate userJDBCTemplate;
-//    private static final Logger LOGGER = Logger.getLogger(ThreadController.class);
 
 
     @Autowired

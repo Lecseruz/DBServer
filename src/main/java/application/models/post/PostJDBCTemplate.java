@@ -19,7 +19,6 @@ import java.util.TimeZone;
 public class PostJDBCTemplate {
 
     private final JdbcTemplate jdbcTemplate;
-    //    private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
 
     @Autowired
     public PostJDBCTemplate(JdbcTemplate jdbcTemplate) {
@@ -30,7 +29,6 @@ public class PostJDBCTemplate {
         final String sql = "TRUNCATE TABLE post CASCADE ";
 
         jdbcTemplate.execute(sql);
-//        LOGGER.debug("drop table success");
 
     }
 
@@ -59,13 +57,11 @@ public class PostJDBCTemplate {
                 pst.setInt(9, post.getParent());
                 pst.setInt(10, post.getId());
                 pst.addBatch();
-//                LOGGER.info("Post with id \"{}\" created", post.getId());
             }
             pst.executeBatch();
             sql = "UPDATE forum SET posts = posts + ? " +
                     "WHERE LOWER(slug) = LOWER(?);";
             jdbcTemplate.update(sql, posts.size(), posts.get(0).getForum());
-            //        LOGGER.debug("create posts with user ");
         } catch (SQLException e) {
             e.getNextException().printStackTrace();
         }
@@ -73,7 +69,6 @@ public class PostJDBCTemplate {
 
     public int getCount() {
         final String sql = "SELECT COUNT(*) FROM post";
-        //        LOGGER.debug("getVoiceWithNickname success");
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
@@ -84,7 +79,6 @@ public class PostJDBCTemplate {
                 " WHERE p.thread = ?" +
                 "ORDER BY p.created " + (desc ? "DESC" : "ASC") + ", p.id " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
 
-        //        LOGGER.debug("get posts success");
         return jdbcTemplate.query(sql, new PostMapper(), id, limit, offset);
     }
 
@@ -94,7 +88,6 @@ public class PostJDBCTemplate {
                 " JOIN forum f ON (p.forum_id = f.id)" +
                 "WHERE p.thread = ?  " +
                 "ORDER BY p.path " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
-        //        LOGGER.debug("get posts success");
         return jdbcTemplate.query(sql, new PostMapper(), id, limit, offset);
     }
 
@@ -108,7 +101,6 @@ public class PostJDBCTemplate {
         for (Integer parent : parents) {
             posts.addAll(jdbcTemplate.query(sql, new PostMapper(), parent, id));
         }
-//        LOGGER.debug("parentTree success");
         return posts;
     }
 
@@ -127,7 +119,6 @@ public class PostJDBCTemplate {
                     " WHERE p.id = ?";
             return jdbcTemplate.queryForObject(sql, new PostMapper(), id);
         } catch (EmptyResultDataAccessException e) {
-            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -136,7 +127,6 @@ public class PostJDBCTemplate {
         if (message != null) {
             final String sql = "UPDATE post SET message = ?, isedited = " + true + " WHERE id = ?";
             jdbcTemplate.update(sql, message, id);
-//            LOGGER.debug("uodate post success");
         }
         return getPostById(id);
     }

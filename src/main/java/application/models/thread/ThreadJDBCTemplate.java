@@ -16,8 +16,6 @@ public class ThreadJDBCTemplate {
 
     private JdbcTemplate jdbcTemplate;
 
-//    private static final Logger LOGGER = Logger.getLogger(ThreadJDBCTemplate.class);
-
     @Autowired
     public ThreadJDBCTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -27,8 +25,6 @@ public class ThreadJDBCTemplate {
         final String query = "TRUNCATE TABLE thread CASCADE ";
 
         jdbcTemplate.execute(query);
-//        LOGGER.debug("drop table success");
-
     }
 
     public @Nullable Thread getThreadBySlugOrId(String slug){
@@ -59,7 +55,6 @@ public class ThreadJDBCTemplate {
                 "UPDATE forum SET threads = threads + 1 " +
                         "WHERE LOWER(slug) = LOWER(?) ;";
         jdbcTemplate.update(sql, thread.getForum());
-//        LOGGER.debug("created" + thread.getTitle() + " with user ");
         thread.setId(id);
     }
 
@@ -78,7 +73,6 @@ public class ThreadJDBCTemplate {
             sql += "WHERE LOWER(slug) = LOWER(?)";
             jdbcTemplate.update(sql, slug);
         }
-//        LOGGER.debug("updateThread success");
         return getThreadBySlug(slug);
     }
 
@@ -88,10 +82,8 @@ public class ThreadJDBCTemplate {
                     " JOIN forum f ON (t.forum_id = f.id)" +
                     " JOIN m_user m ON (m.id = t.user_id)" +
                     " WHERE t.id = ?";
-            //            LOGGER.debug("getThreadById success");
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, new ThreadMapper());
         } catch (EmptyResultDataAccessException e) {
-//            LOGGER.error(e);
             return null;
         }
     }
@@ -102,10 +94,8 @@ public class ThreadJDBCTemplate {
                     " JOIN forum f ON (t.forum_id = f.id) " +
                     " JOIN m_user m ON (m.id = t.user_id)" +
                     " WHERE LOWER(t.slug) = LOWER(?)";
-            //            LOGGER.debug("getThreadById success");
             return jdbcTemplate.queryForObject(sql, new Object[]{slug}, new ThreadMapper());
         } catch (EmptyResultDataAccessException e) {
-//            LOGGER.error(e);
             return null;
         }
     }
@@ -135,13 +125,11 @@ public class ThreadJDBCTemplate {
         } else {
             threads = jdbcTemplate.query(sql, new ThreadMapper(), id);
         }
-//        LOGGER.debug("getThreads success");
         return threads;
     }
 
     public int getCount() {
         final String sql = "SELECT COUNT(*) FROM thread";
-        //        LOGGER.debug("getVoiceWithNickname success");
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 

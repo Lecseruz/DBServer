@@ -37,9 +37,7 @@ public class StatusJDBCTemplate {
     }
 
     public Status getStatus() {
-        final Status status = new Status(userJDBCTemplate.getCount(), forumJDBCTemplate.getCount(),  threadJDBCTemplate.getCount(), postJDBCTemplate.getCount());
-//        LOGGER.debug("get status success");
-        return status;
+        return new Status(userJDBCTemplate.getCount(), forumJDBCTemplate.getCount(),  threadJDBCTemplate.getCount(), postJDBCTemplate.getCount());
     }
 
     public void clearTable() {
