@@ -13,7 +13,7 @@ public class PostMapper implements RowMapper<Post> {
     @Override
     public Post mapRow(ResultSet resultSet, int i) throws SQLException {
         final Post post = new Post();
-        post.setAuthor(resultSet.getString("nickname"));
+        post.setAuthor(resultSet.getString("__nickname"));
         post.setCreated(TimestampHelper.fromTimestamp(resultSet.getTimestamp("created")));
         post.setForum(resultSet.getString("forum_slug"));
         post.setId(resultSet.getInt("id"));

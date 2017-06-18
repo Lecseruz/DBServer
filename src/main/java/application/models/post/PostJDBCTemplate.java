@@ -38,9 +38,9 @@ public class PostJDBCTemplate {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        String sql = "INSERT INTO post (id, parent_id, user_id, message, isEdited, forum_id, thread, created, path) VALUES (?, ?, " +
+        String sql = "INSERT INTO post (id, parent_id, user_id, message, isEdited, forum_id, thread, created, __nickname, path) VALUES (?, ?, " +
                 "(SELECT id FROM m_user m WHERE LOWER(m.nickname COLLATE \"ucs_basic\") = LOWER(? COLLATE \"ucs_basic\")), ?, ?, " +
-                "(SELECT id FROM forum f WHERE LOWER(f.slug) = LOWER(?)), ?, ?, array_append((SELECT path FROM post WHERE id = ?), ?))";
+                "(SELECT id FROM forum f WHERE LOWER(f.slug) = LOWER(?)), ?, ?, ?, array_append((SELECT path FROM post WHERE id = ?), ?))";
         try (Connection conn = jdbcTemplate.getDataSource().getConnection();
              PreparedStatement pst = conn.prepareStatement(sql, Statement.NO_GENERATED_KEYS)) {
             for (Post post : posts) {
@@ -54,8 +54,9 @@ public class PostJDBCTemplate {
                 pst.setString(6, post.getForum());
                 pst.setInt(7, post.getThread());
                 pst.setTimestamp(8, created);
-                pst.setInt(9, post.getParent());
-                pst.setInt(10, post.getId());
+                pst.setString(9, post.getAuthor());
+                pst.setInt(10, post.getParent());
+                pst.setInt(11, post.getId());
                 pst.addBatch();
             }
             pst.executeBatch();
@@ -73,9 +74,8 @@ public class PostJDBCTemplate {
     }
 
     public List<Post> flatSort(int id, int limit, int offset, boolean desc) {
-        final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
+        final String sql = "SELECT p.*, f.slug as forum_slug FROM post p " +
                 " JOIN forum f ON (p.forum_id = f.id)" +
-                " JOIN m_user m ON (m.id = p.user_id)" +
                 " WHERE p.thread = ?" +
                 "ORDER BY p.created " + (desc ? "DESC" : "ASC") + ", p.id " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
 
@@ -83,8 +83,7 @@ public class PostJDBCTemplate {
     }
 
     public List<Post> treeSort(int id, int limit, int offset, boolean desc) {
-        final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
-                " JOIN m_user m ON (m.id = p.user_id)" +
+        final String sql = "SELECT p.*, f.slug as forum_slug FROM post p " +
                 " JOIN forum f ON (p.forum_id = f.id)" +
                 "WHERE p.thread = ?  " +
                 "ORDER BY p.path " + (desc ? "DESC" : "ASC") + " LIMIT ? OFFSET ?";
@@ -92,8 +91,7 @@ public class PostJDBCTemplate {
     }
 
     public List<Post> parentTreeSort(int id, Boolean desc, List<Integer> parents) {
-        final String sql = "SELECT p.*, m.nickname, f.slug as forum_slug FROM post p " +
-                " JOIN m_user m ON (m.id = p.user_id)"  +
+        final String sql = "SELECT p.*, f.slug as forum_slug FROM post p " +
                 " JOIN forum f ON (p.forum_id = f.id)" +
                 "WHERE p.path[1] = ? AND p.thread = ? " +
                 "ORDER BY p.path " + (desc ? "DESC" : "ASC") + ", p.id " + (desc ? "DESC" : "ASC");
@@ -113,9 +111,8 @@ public class PostJDBCTemplate {
     public @Nullable Post getPostById(int id) {
         try {
             //            LOGGER.debug("get post by id success");
-            final String sql = "SELECT p.*, m.nickname, f.slug AS forum_slug FROM post p " +
+            final String sql = "SELECT p.*, f.slug AS forum_slug FROM post p " +
                     " JOIN forum f ON (p.forum_id = f.id)" +
-                    " JOIN m_user m ON (m.id = p.user_id)" +
                     " WHERE p.id = ?";
             return jdbcTemplate.queryForObject(sql, new PostMapper(), id);
         } catch (EmptyResultDataAccessException e) {

@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
-/**
- * Created by magomed on 22.03.17.
- */
+
+
+
 
 @RestController
 @RequestMapping(value = "/api/service")
