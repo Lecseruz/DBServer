@@ -1,36 +1,31 @@
 package application.controller;
 
-import application.models.status.StatusJDBCTemplate;
+import application.dao.StatusDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
-
-
-
 
 @RestController
 @RequestMapping(value = "/api/service")
 public class ServiceController {
-    private final StatusJDBCTemplate statusJDBCTemplate;
+    private final StatusDao statusDao;
 
     @Autowired
-    public ServiceController(StatusJDBCTemplate statusJDBCTemplate) {
-        this.statusJDBCTemplate = statusJDBCTemplate;
+    public ServiceController(StatusDao statusDao) {
+        this.statusDao = statusDao;
     }
 
     @RequestMapping(value = "/clear", method = RequestMethod.POST)
-    public ResponseEntity<?> clear() throws IOException {
-        statusJDBCTemplate.clearTable();
-        return ResponseEntity.ok(null);
+    public ResponseEntity<?> clear() {
+        statusDao.clearTable();
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
-    public ResponseEntity<?> status() throws IOException {
-        return ResponseEntity.ok(statusJDBCTemplate.getStatus());
+    public ResponseEntity<?> status() {
+        return ResponseEntity.ok(statusDao.getStatus());
     }
 }

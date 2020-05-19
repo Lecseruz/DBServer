@@ -1,64 +1,62 @@
 package application.controller;
 
-import application.models.status.StatusJDBCTemplate;
-import application.models.user.User;
-import application.models.user.UserJDBCTemplate;
+import application.models.User;
+import application.service.api.DuplicateResourceException;
+import application.service.api.IUserService;
+import application.service.api.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 
 @RestController
 @RequestMapping(value = "/api/user/{nickname}")
 public class UserController {
-    final UserJDBCTemplate userJDBCTemplate;
-    final StatusJDBCTemplate statusJDBCTemplate;
+    private static Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+
+    private final IUserService userService;
 
     @Autowired
-    public UserController(UserJDBCTemplate userJDBCTemplate, StatusJDBCTemplate statusJDBCTemplate) {
-        this.userJDBCTemplate = userJDBCTemplate;
-        this.statusJDBCTemplate = statusJDBCTemplate;
+    public UserController(IUserService userService) {
+        this.userService = userService;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public ResponseEntity<?> createUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
-        user.setNickname(nickname);
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<?> createUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) {
         try {
-            userJDBCTemplate.create(nickname, user.getFullname(), user.getAbout(), user.getEmail());
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
-        } catch (DuplicateKeyException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(userJDBCTemplate.getUsersByNicknameOrEmail(nickname, user.getEmail()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(nickname, user));
+        } catch (DuplicateResourceException e) {
+            LOGGER.error(e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(userService.getUsersByNicknameOrEmail(nickname, user.getEmail()));
+        } catch (ResourceNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
-    public ResponseEntity<?> getUser(@PathVariable(value = "nickname") String nickname) throws IOException {
-        final User user = userJDBCTemplate.getUserByNickname(nickname);
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        } else {
+    public ResponseEntity<?> getUser(@PathVariable(value = "nickname") String nickname) {
+        try {
+            return ResponseEntity.ok(userService.getUser(nickname));
+        } catch (ResourceNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
             return ResponseEntity.notFound().build();
         }
     }
 
     @RequestMapping(value = "/profile", method = RequestMethod.POST)
-    public ResponseEntity<?> updateUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) throws IOException {
-        user.setNickname(nickname);
+    public ResponseEntity<?> updateUser(@PathVariable(value = "nickname") String nickname, @RequestBody User user) {
         try {
-            user = userJDBCTemplate.update(user.getAbout(), user.getEmail(), user.getFullname(), nickname);
-        }catch (DuplicateKeyException d){
+            return ResponseEntity.ok(userService.update(nickname, user));
+        } catch (DuplicateResourceException e) {
+            LOGGER.error(e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-        if (user == null) {
+        } catch (ResourceNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        return ResponseEntity.ok(userJDBCTemplate.getUserByNickname(nickname));
     }
 }
