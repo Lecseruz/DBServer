@@ -3,6 +3,7 @@ package application.service.api;
 import application.models.ResponseInfoPost;
 import application.models.Post;
 import application.models.PostUpdate;
+import application.service.exception.ResourceNotFoundException;
 
 import java.util.List;
 import java.util.Set;

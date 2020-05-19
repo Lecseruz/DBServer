@@ -2,7 +2,7 @@ package application.service.impl;
 
 import application.models.Forum;
 import application.dao.ForumDao;
-import application.service.api.ResourceNotFoundException;
+import application.service.exception.ResourceNotFoundException;
 import application.service.api.IForumService;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;

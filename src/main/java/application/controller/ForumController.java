@@ -3,6 +3,8 @@ package application.controller;
 import application.models.Forum;
 import application.models.Thread;
 import application.service.api.*;
+import application.service.exception.DuplicateResourceException;
+import application.service.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

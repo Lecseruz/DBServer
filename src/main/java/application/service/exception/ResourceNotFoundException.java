@@ -1,4 +1,4 @@
-package application.service.api;
+package application.service.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String countryIsWrong) {

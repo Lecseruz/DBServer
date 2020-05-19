@@ -1,4 +1,4 @@
-package application.service.api;
+package application.service.exception;
 
 public class DuplicateResourceException extends RuntimeException {
     public DuplicateResourceException(String countryIsWrong) {

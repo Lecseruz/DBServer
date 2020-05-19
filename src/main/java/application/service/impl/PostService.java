@@ -10,7 +10,7 @@ import application.dao.ThreadDao;
 import application.dao.UserDao;
 import application.service.api.IPostService;
 import application.service.api.IThreadService;
-import application.service.api.ResourceNotFoundException;
+import application.service.exception.ResourceNotFoundException;
 import jdk.internal.jline.internal.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;

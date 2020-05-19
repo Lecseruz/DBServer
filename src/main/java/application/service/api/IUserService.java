@@ -1,6 +1,7 @@
 package application.service.api;
 
 import application.models.User;
+import application.service.exception.ResourceNotFoundException;
 
 import java.util.List;
 

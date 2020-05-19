@@ -4,12 +4,14 @@ import application.models.Voice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by magomed on 26.04.17.
  */
 
 @Service
+@Transactional
 public class VoiceDao {
     private JdbcTemplate jdbcTemplate;
 

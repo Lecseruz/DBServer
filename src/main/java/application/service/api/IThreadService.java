@@ -3,6 +3,8 @@ package application.service.api;
 import application.models.ResponsePosts;
 import application.models.Thread;
 import application.models.ThreadUpdate;
+import application.service.exception.DuplicateResourceException;
+import application.service.exception.ResourceNotFoundException;
 
 import java.util.List;
 
