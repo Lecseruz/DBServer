@@ -11,10 +11,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
 
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Repository
 @Transactional
 public class ThreadDao {
 
