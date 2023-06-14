@@ -19,7 +19,7 @@
         <start-class>application.Application</start-class>
         <maven-plugin-annotations.version>3.3</maven-plugin-annotations.version>
         <postgresql.version>42.2.12</postgresql.version>
-        <guava.version>29.0-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
     </properties>
 
     <dependencies>
